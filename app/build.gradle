@@ -40,6 +40,14 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def date = new Date().format("YYYYMMddHHmm")
+            def apkName = "xmokeewrapshare_${versionName}_${date}.apk"
+            outputFileName = apkName
+        }
+    }
 }
 
 dependencies {
@@ -72,4 +80,7 @@ dependencies {
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
 }

@@ -126,6 +126,7 @@ public class NearShareManager implements
             final NearSharePeer peer = NearSharePeer.from(args.getRemoteSystem());
             final RemoteSystemConnectionRequest connectionRequest = new RemoteSystemConnectionRequest(peer.remoteSystem);
             if (mNearShareSender.isNearShareSupported(connectionRequest)) {
+                Log.d(TAG, "Found: " + peer.id + " (" + peer.name + ")");
                 mPeers.put(peer.id, peer);
                 mHandler.post(() -> mDiscoverListener.onPeerFound(peer));
             }
