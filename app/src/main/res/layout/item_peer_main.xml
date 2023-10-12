@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (C) 2019 The MoKee Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,75 +14,73 @@
   ~ limitations under the License.
   -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="8dp"
-    android:layout_marginVertical="4dp"
     android:background="@drawable/item_background_rounded"
     android:foreground="@drawable/item_foreground_rounded"
     android:gravity="center_vertical"
-    android:minHeight="64dp"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:padding="8dp">
 
-    <FrameLayout
+    <ImageView
+        android:id="@+id/icon"
         android:layout_width="56dp"
         android:layout_height="56dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="16dp">
+        android:layout_margin="8dp"
+        android:contentDescription="device type"
+        android:scaleType="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="?android:textColorSecondary"
+        tools:src="@drawable/ic_apple_24dp" />
 
-        <ImageView
-            android:id="@+id/icon"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="8dp"
-            android:scaleType="center"
-            android:tint="?android:textColorSecondary"
-            tools:src="@drawable/ic_apple_24dp" />
 
-        <me.zhanghai.android.materialprogressbar.MaterialProgressBar
-            android:id="@+id/progress"
-            style="@style/Widget.MaterialProgressBar.ProgressBar"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:indeterminate="true"
-            app:mpb_setBothDrawables="true"
-            tools:indeterminate="false"
-            tools:max="100"
-            tools:progress="75" />
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/progress"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:indeterminate="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/icon"
+        app:layout_constraintStart_toStartOf="@id/icon"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:indeterminate="true"
+        tools:max="100"
+        tools:progress="75" />
 
-    </FrameLayout>
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="16dp"
-        android:layout_weight="1"
-        android:orientation="vertical">
+        android:layout_marginStart="8dp"
+        android:ellipsize="end"
+        android:lines="1"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@id/status"
+        app:layout_constraintEnd_toStartOf="@id/cancel"
+        app:layout_constraintStart_toEndOf="@id/icon"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="XiNGRZ\'s iPhone" />
 
-        <TextView
-            android:id="@+id/name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:lines="1"
-            android:textColor="@android:color/black"
-            android:textSize="16sp"
-            tools:text="XiNGRZ\'s iPhone" />
-
-        <TextView
-            android:id="@+id/status"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            tools:text="Sending…"
-            tools:visibility="visible" />
-
-    </LinearLayout>
+    <TextView
+        android:id="@+id/status"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/cancel"
+        app:layout_constraintStart_toEndOf="@id/icon"
+        app:layout_constraintTop_toBottomOf="@id/name"
+        tools:text="Sending…"
+        tools:visibility="visible" />
 
     <ImageButton
         android:id="@+id/cancel"
@@ -91,9 +88,13 @@
         android:layout_height="48dp"
         android:layout_margin="8dp"
         android:background="@android:color/transparent"
+        android:contentDescription="@android:string/cancel"
         android:foreground="?selectableItemBackgroundBorderless"
         android:src="@drawable/ic_cancel_black_24dp"
         android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible" />
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

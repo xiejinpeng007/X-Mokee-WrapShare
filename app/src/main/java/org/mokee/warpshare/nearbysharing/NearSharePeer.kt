@@ -13,25 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.mokee.warpshare.nearbysharing
 
-package org.mokee.warpshare.nearbysharing;
+import com.microsoft.connecteddevices.remotesystems.RemoteSystem
+import org.mokee.warpshare.MainPeerState
+import org.mokee.warpshare.base.Peer
 
-import com.microsoft.connecteddevices.remotesystems.RemoteSystem;
-
-import org.mokee.warpshare.base.Peer;
-
-@SuppressWarnings("WeakerAccess")
-public class NearSharePeer extends Peer {
-
-    final RemoteSystem remoteSystem;
-
-    private NearSharePeer(String id, String name, RemoteSystem remoteSystem) {
-        super(id, name);
-        this.remoteSystem = remoteSystem;
+class NearSharePeer(id: String, name: String, val remoteSystem: RemoteSystem) :
+    Peer(id, name, MainPeerState()) {
+    companion object {
+        fun from(system: RemoteSystem): NearSharePeer {
+            return NearSharePeer(system.id, system.displayName ?: "", system)
+        }
     }
-
-    static NearSharePeer from(RemoteSystem system) {
-        return new NearSharePeer(system.getId(), system.getDisplayName(), system);
-    }
-
 }

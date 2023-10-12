@@ -29,10 +29,12 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.IBinder;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import org.mokee.warpshare.airdrop.AirDropManager;
@@ -105,9 +107,15 @@ public class ReceiverService extends Service implements AirDropManager.ReceiverL
     };
 
     static PendingIntent getTriggerIntent(Context context) {
-        return PendingIntent.getForegroundService(context, 0,
-                new Intent(ACTION_SCAN_RESULT, null, context, ReceiverService.class),
-                PendingIntent.FLAG_UPDATE_CURRENT);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return PendingIntent.getForegroundService(context, 0,
+                    new Intent(ACTION_SCAN_RESULT, null, context, ReceiverService.class),
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        }else{
+            return PendingIntent.getService(context, 0,
+                    new Intent(ACTION_SCAN_RESULT, null, context, ReceiverService.class),
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        }
     }
 
     static void updateDiscoverability(Context context) {
@@ -148,18 +156,18 @@ public class ReceiverService extends Service implements AirDropManager.ReceiverL
 
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
-        final NotificationChannel serviceChannel = new NotificationChannel(NOTIFICATION_CHANNEL_SERVICE,
-                getString(R.string.notif_recv_service_channel), IMPORTANCE_MIN);
-        serviceChannel.enableLights(false);
-        serviceChannel.enableVibration(false);
-        serviceChannel.setShowBadge(false);
-
-        mNotificationManager.createNotificationChannel(serviceChannel);
-
-        final NotificationChannel transferChannel = new NotificationChannel(NOTIFICATION_CHANNEL_TRANSFER,
-                getString(R.string.notif_recv_transfer_channel), IMPORTANCE_HIGH);
-
-        mNotificationManager.createNotificationChannel(transferChannel);
+        final NotificationChannel serviceChannel;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            serviceChannel = new NotificationChannel(NOTIFICATION_CHANNEL_SERVICE,
+                    getString(R.string.notif_recv_service_channel), IMPORTANCE_MIN);
+            serviceChannel.enableLights(false);
+            serviceChannel.enableVibration(false);
+            serviceChannel.setShowBadge(false);
+            mNotificationManager.createNotificationChannel(serviceChannel);
+            final NotificationChannel transferChannel = new NotificationChannel(NOTIFICATION_CHANNEL_TRANSFER,
+                    getString(R.string.notif_recv_transfer_channel), IMPORTANCE_HIGH);
+            mNotificationManager.createNotificationChannel(transferChannel);
+        }
 
         startForeground(NOTIFICATION_ACTIVE, getNotificationBuilder(NOTIFICATION_CHANNEL_SERVICE, CATEGORY_SERVICE)
                 .setContentTitle(getString(R.string.notif_recv_active_title))
@@ -448,15 +456,24 @@ public class ReceiverService extends Service implements AirDropManager.ReceiverL
     }
 
     private PendingIntent getTransferIntent(String action, String ip) {
-        return PendingIntent.getForegroundService(this, 0,
-                new Intent(action, null, this, getClass())
-                        .setData(new Uri.Builder().path(ip).build()),
-                PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent intent = new Intent(action, null, this, getClass())
+                .setData(new Uri.Builder().path(ip).build());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return PendingIntent.getForegroundService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        }else{
+            return PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        }
     }
 
+    @NonNull
     private Notification.Builder getNotificationBuilder(String channelId, String category) {
-        return new Notification.Builder(this, channelId)
-                .setCategory(category)
+        Notification.Builder builder;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder = new Notification.Builder(this, channelId);
+        }else{
+            builder = new Notification.Builder(this);
+        }
+        return builder.setCategory(category)
                 .setSmallIcon(R.drawable.ic_notification_white_24dp)
                 .setColor(getColor(R.color.primary));
     }

@@ -21,13 +21,13 @@ import android.content.Context;
 import android.os.PowerManager;
 import android.util.Log;
 
-class PartialWakeLock {
+public class PartialWakeLock {
 
     private static final String TAG = "PartialWakeLock";
 
     private final PowerManager.WakeLock mWakeLock;
 
-    PartialWakeLock(Context context, String tag) {
+    public PartialWakeLock(Context context, String tag) {
         final PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         if (pm == null) {
             mWakeLock = null;

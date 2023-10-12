@@ -22,7 +22,7 @@
     android:layout_margin="32dp"
     android:gravity="center"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context=".ui.main.MainActivity">
 
     <TextView
         android:layout_width="match_parent"

@@ -26,7 +26,7 @@ public class WarpShareApplication extends Application {
 
     private CertificateManager mCertificateManager;
 
-    static WarpShareApplication from(Context context) {
+    public static WarpShareApplication from(Context context) {
         return (WarpShareApplication) context.getApplicationContext();
     }
 
@@ -36,7 +36,7 @@ public class WarpShareApplication extends Application {
         mCertificateManager = new CertificateManager(this);
     }
 
-    CertificateManager getCertificateManager() {
+    public CertificateManager getCertificateManager() {
         return mCertificateManager;
     }
 

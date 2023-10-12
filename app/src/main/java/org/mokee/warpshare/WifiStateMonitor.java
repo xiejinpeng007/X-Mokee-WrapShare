@@ -18,8 +18,8 @@ package org.mokee.warpshare;
 
 import android.net.ConnectivityManager;
 
-abstract class WifiStateMonitor extends SelfBroadcastReceiver {
-    WifiStateMonitor() {
+public abstract class WifiStateMonitor extends SelfBroadcastReceiver {
+    protected WifiStateMonitor() {
         super(ConnectivityManager.CONNECTIVITY_ACTION);
     }
 }

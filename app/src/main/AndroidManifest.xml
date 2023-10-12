@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (C) 2019 The MoKee Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,33 +15,37 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="org.mokee.warpshare">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-feature
         android:name="android.hardware.bluetooth_le"
         android:required="true" />
 
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"/>
 
     <application
         android:name=".WarpShareApplication"
-        android:allowBackup="false"
+        android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
 
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".ui.main.MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -51,6 +54,7 @@
 
         <activity
             android:name=".ShareActivity"
+            android:exported="true"
             android:theme="@style/ShareTheme">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
@@ -80,6 +84,7 @@
             android:label="@string/settings" />
 
         <service
+            android:foregroundServiceType="connectedDevice"
             android:name=".ReceiverService"
             android:enabled="false" />
 
@@ -88,7 +93,9 @@
             android:exported="true"
             tools:ignore="ExportedReceiver" />
 
-        <receiver android:name=".InitializeReceiver">
+        <receiver
+            android:name=".InitializeReceiver"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>

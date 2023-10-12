@@ -18,8 +18,8 @@ package org.mokee.warpshare;
 
 import android.bluetooth.BluetoothAdapter;
 
-abstract class BluetoothStateMonitor extends SelfBroadcastReceiver {
-    BluetoothStateMonitor() {
+public abstract class BluetoothStateMonitor extends SelfBroadcastReceiver {
+    public BluetoothStateMonitor() {
         super(BluetoothAdapter.ACTION_STATE_CHANGED);
     }
 }

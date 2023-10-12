@@ -13,17 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.mokee.warpshare.base
 
-package org.mokee.warpshare.base;
+import org.mokee.warpshare.MainPeerState
 
-public class Peer {
-
-    public final String id;
-    public final String name;
-
-    public Peer(String id, String name) {
-        this.id = id;
-        this.name = name;
+open class Peer(@JvmField val id: String,
+                @JvmField val name: String,
+                @JvmField val status: MainPeerState = MainPeerState(),
+    ){
+    override fun toString(): String {
+        return "Peer(id='$id', name='$name')"
     }
-
 }

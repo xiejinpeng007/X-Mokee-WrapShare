@@ -34,7 +34,7 @@ abstract class SelfBroadcastReceiver extends BroadcastReceiver {
         }
     }
 
-    void register(Context context) {
+    public void register(Context context) {
         synchronized (mLock) {
             if (!mRegistered) {
                 context.registerReceiver(this, mIntentFilter);
@@ -43,7 +43,7 @@ abstract class SelfBroadcastReceiver extends BroadcastReceiver {
         }
     }
 
-    void unregister(Context context) {
+    public void unregister(Context context) {
         synchronized (mLock) {
             if (mRegistered) {
                 context.unregisterReceiver(this);

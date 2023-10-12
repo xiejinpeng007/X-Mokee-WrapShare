@@ -28,14 +28,14 @@ public class TriggerReceiver extends BroadcastReceiver {
 
     public static final String EXTRA_CALLBACK_INTENT = "callback";
 
-    static PendingIntent getTriggerIntent(Context context) {
+    public static PendingIntent getTriggerIntent(Context context) {
         final PendingIntent callbackIntent = ReceiverService.getTriggerIntent(context);
 
         final Intent intent = new Intent(context, TriggerReceiver.class);
         intent.putExtra(TriggerReceiver.EXTRA_CALLBACK_INTENT, callbackIntent);
 
         return PendingIntent.getBroadcast(context, callbackIntent.hashCode(),
-                intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
 
     @Override
