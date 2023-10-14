@@ -27,7 +27,7 @@
     android:padding="8dp">
 
     <ImageView
-        android:id="@+id/icon"
+        android:id="@+id/peer_icon"
         android:layout_width="56dp"
         android:layout_height="56dp"
         android:contentDescription="device type"
@@ -39,14 +39,14 @@
         tools:src="@drawable/ic_apple_24dp" />
 
     <com.google.android.material.progressindicator.CircularProgressIndicator
-        android:id="@+id/progress"
+        android:id="@+id/progress_bar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:indeterminate="true"
         app:indicatorSize="48dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@id/icon"
-        app:layout_constraintStart_toStartOf="@id/icon"
+        app:layout_constraintEnd_toEndOf="@id/peer_icon"
+        app:layout_constraintStart_toStartOf="@id/peer_icon"
         app:layout_constraintTop_toTopOf="parent"
         tools:indeterminate="false"
         tools:max="100"
@@ -54,7 +54,7 @@
 
 
     <TextView
-        android:id="@+id/name"
+        android:id="@+id/text_peer_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -62,28 +62,28 @@
         android:lines="1"
         android:textColor="@android:color/black"
         android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@id/status"
-        app:layout_constraintEnd_toStartOf="@id/cancel"
-        app:layout_constraintStart_toEndOf="@id/icon"
+        app:layout_constraintBottom_toTopOf="@id/text_status"
+        app:layout_constraintEnd_toStartOf="@id/btn_cancel"
+        app:layout_constraintStart_toEndOf="@id/peer_icon"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed"
         tools:text="XiNGRZ\'s iPhone" />
 
     <TextView
-        android:id="@+id/status"
+        android:id="@+id/text_status"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/cancel"
-        app:layout_constraintStart_toEndOf="@id/icon"
-        app:layout_constraintTop_toBottomOf="@id/name"
+        app:layout_constraintEnd_toStartOf="@id/btn_cancel"
+        app:layout_constraintStart_toEndOf="@id/peer_icon"
+        app:layout_constraintTop_toBottomOf="@id/text_peer_name"
         tools:text="Sending…"
         tools:visibility="visible" />
 
     <ImageButton
-        android:id="@+id/cancel"
+        android:id="@+id/btn_cancel"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_margin="8dp"

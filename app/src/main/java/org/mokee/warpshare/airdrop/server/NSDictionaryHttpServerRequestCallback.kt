@@ -1,6 +1,7 @@
 package org.mokee.warpshare.airdrop.server
 
 import android.util.Log
+import com.dd.plist.BinaryPropertyListWriter
 import com.dd.plist.NSDictionary
 import com.dd.plist.PropertyListParser
 import com.koushikdutta.async.AsyncNetworkSocket
@@ -55,10 +56,10 @@ internal abstract class NSDictionaryHttpServerRequestCallback : HttpServerReques
                     response.code(code).end()
                 }
 
-                override fun send(res: NSDictionary?) {
+                override fun send(nsDictionary: NSDictionary?) {
                     try {
                         val buffer1 = Buffer()
-                        PropertyListParser.saveAsBinary(res, buffer1.outputStream())
+                        BinaryPropertyListWriter.write(nsDictionary, buffer1.outputStream())
                         response.send(AirDropServer.MIME_OCTET_STREAM, buffer1.readByteArray())
                     } catch (e: Exception) {
                         Log.e(TAG, "Failed serializing response", e)

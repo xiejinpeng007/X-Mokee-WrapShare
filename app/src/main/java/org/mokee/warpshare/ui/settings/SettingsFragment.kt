@@ -24,18 +24,20 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import org.mokee.warpshare.ConfigManager
 import org.mokee.warpshare.R
-import org.mokee.warpshare.ReceiverService
+import org.mokee.warpshare.ui.service.ReceiverService
 
 class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeListener {
+
     private var mConfigManager: ConfigManager? = null
+
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.settings)
-        preferenceManager.sharedPreferences!!.registerOnSharedPreferenceChangeListener(this)
-        mConfigManager = ConfigManager(requireContext()).apply {
-            findPreference<SwitchPreference>(ConfigManager.KEY_DISCOVERABLE)?.also{
+        preferenceManager.sharedPreferences?.registerOnSharedPreferenceChangeListener(this)
+        mConfigManager = ConfigManager.apply {
+            findPreference<SwitchPreference>(KEY_DISCOVERABLE)?.also{
                 it.setSummary(if (this.isDiscoverable) R.string.settings_discoverable_on else R.string.settings_discoverable_off)
             }
-            findPreference<EditTextPreference>(ConfigManager.KEY_NAME)?.also {
+            findPreference<EditTextPreference>(KEY_NAME)?.also {
                 it.text = this.nameWithoutDefault
                 it.summary = this.name
                 it.setOnBindEditTextListener { editText: EditText ->
@@ -50,14 +52,21 @@ class SettingsFragment : PreferenceFragmentCompat(), OnSharedPreferenceChangeLis
             ConfigManager.KEY_DISCOVERABLE -> {
                 val discoverablePref =
                     findPreference<SwitchPreference>(ConfigManager.KEY_DISCOVERABLE)
-                discoverablePref?.setSummary(if (mConfigManager!!.isDiscoverable) R.string.settings_discoverable_on else R.string.settings_discoverable_off)
-                ReceiverService.updateDiscoverability(context)
+                discoverablePref?.setSummary(if (mConfigManager?.isDiscoverable == true) {
+                    R.string.settings_discoverable_on
+                } else {
+                    R.string.settings_discoverable_off
+                }
+                )
+                context?.also{
+                    ReceiverService.updateDiscoverability(it)
+                }
             }
 
             ConfigManager.KEY_NAME -> {
                 val namePref = findPreference<EditTextPreference>(ConfigManager.KEY_NAME)
                 if (namePref != null) {
-                    namePref.summary = mConfigManager!!.name
+                    namePref.summary = mConfigManager?.name
                 }
             }
         }

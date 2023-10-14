@@ -33,7 +33,7 @@ import android.util.Log
 import org.mokee.warpshare.ui.PermissionUtil
 import org.mokee.warpshare.ui.PermissionUtil.Companion.checkPermission
 
-internal class AirDropBleController(private val mContext: Context) {
+internal class AirDropBleController(private val bleManager: BluetoothManager) {
     private val mAdvertiseCallback: AdvertiseCallback = object : AdvertiseCallback() {
         override fun onStartSuccess(settingsInEffect: AdvertiseSettings) {
             handleAdvertiseStartSuccess()
@@ -49,10 +49,7 @@ internal class AirDropBleController(private val mContext: Context) {
         get() {
             if (mAdapter != null) return mAdapter
 
-            val manager =
-                (mContext.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager)
-                    ?: return null
-            val adapter = manager.adapter
+            val adapter = bleManager.adapter
             return if (adapter == null || !adapter.isEnabled) {
                 null
             } else {
@@ -69,7 +66,6 @@ internal class AirDropBleController(private val mContext: Context) {
         get() {
             return adapter?.bluetoothLeScanner
         }
-
 
 
     @Synchronized

@@ -13,13 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.mokee.warpshare.ui.receiver
 
-package org.mokee.warpshare;
+import android.net.ConnectivityManager
 
-import android.net.ConnectivityManager;
-
-public abstract class WifiStateMonitor extends SelfBroadcastReceiver {
-    protected WifiStateMonitor() {
-        super(ConnectivityManager.CONNECTIVITY_ACTION);
-    }
-}
+abstract class WifiStateMonitor protected constructor() :
+    SelfBroadcastReceiver(ConnectivityManager.CONNECTIVITY_ACTION)

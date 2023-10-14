@@ -16,7 +16,7 @@ android {
     }
     signingConfigs {
         release {
-            storeFile file('../keystore/xmokee-wrapshare')
+            storeFile file('../keystore/xmokee-warpshare')
             storePassword "xmokeewrapshare"
             keyAlias "xmokeewrapshare"
             keyPassword "xmokeewrapshare"
@@ -51,7 +51,7 @@ android {
     applicationVariants.configureEach { variant ->
         variant.outputs.configureEach { output ->
             def date = new Date().format("YYYYMMddHHmm")
-            def apkName = "xmokeewrapshare_${versionName}_${date}.apk"
+            def apkName = "xmokeewarpshare_${versionName}_${date}.apk"
             outputFileName = apkName
         }
     }
@@ -76,7 +76,7 @@ dependencies {
     implementation 'org.slf4j:slf4j-api:2.0.9'
     implementation 'org.jmdns:jmdns:3.5.8'
     implementation("com.microsoft.connecteddevices:connecteddevices-sdk:1.6.1"){
-        exclude(group: "android.support")
+        exclude(group: "com.android.support")
     }
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"

@@ -15,45 +15,50 @@
  */
 package org.mokee.warpshare
 
-import android.bluetooth.BluetoothManager
-import android.content.Context
-import android.content.SharedPreferences
-import android.text.TextUtils
-import androidx.preference.PreferenceManager
+import org.mokee.warpshare.di.AppModule2
 import org.mokee.warpshare.ui.PermissionUtil
 import org.mokee.warpshare.ui.PermissionUtil.Companion.checkPermission
 
-class ConfigManager(private val mContext: Context) {
-    private val mPref: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(mContext)
+/**
+ * 设置相关管理类
+ */
+object ConfigManager {
 
     private val bluetoothAdapterName: String?
         get() {
-            val manager = mContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-            val adapter = manager.adapter ?: return null
+            val adapter = AppModule2.bleManager.adapter ?: return null
             return if (!checkPermission(PermissionUtil.blePermissions)) {
                 null
             } else {
                 adapter.name
             }
         }
+
+    /**
+     * 默认名称 默认 设备名，没有直接 “Android”
+     */
     val defaultName: String
         get() {
-            val name = bluetoothAdapterName
-            return if (TextUtils.isEmpty(name)) "Android" else name!!
+            return bluetoothAdapterName.takeIf { !it.isNullOrBlank() } ?: "Android"
         }
+
+    /**
+     * 自定义名称????
+     */
     val nameWithoutDefault: String?
-        get() = mPref.getString(KEY_NAME, "")
+        get() = AppModule2.mPref.getString(KEY_NAME, "")
+
+    /**
+     * 自定义名称 或者 默认名称
+     */
     val name: String
         get() {
-            val name = nameWithoutDefault
-            return if (TextUtils.isEmpty(name)) defaultName else name!!
+            return nameWithoutDefault.takeIf { !it.isNullOrBlank() } ?: defaultName
         }
     val isDiscoverable: Boolean
-        get() = mPref.getBoolean(KEY_DISCOVERABLE, false)
+        get() = AppModule2.mPref.getBoolean(KEY_DISCOVERABLE, false)
 
-    companion object {
-        const val KEY_NAME = "name"
-        const val KEY_DISCOVERABLE = "discoverable"
-        private const val TAG = "ConfigManager"
-    }
+    const val KEY_NAME = "name"
+    const val KEY_DISCOVERABLE = "discoverable"
+    private const val TAG = "ConfigManager"
 }

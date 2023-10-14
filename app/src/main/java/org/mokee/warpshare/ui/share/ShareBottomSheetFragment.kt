@@ -26,13 +26,15 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import org.mokee.warpshare.BluetoothStateMonitor
-import org.mokee.warpshare.PartialWakeLock
+import kotlinx.coroutines.launch
+import org.mokee.warpshare.ui.receiver.BluetoothStateMonitor
 import org.mokee.warpshare.R
-import org.mokee.warpshare.WifiStateMonitor
+import org.mokee.warpshare.ui.receiver.WifiStateMonitor
 import org.mokee.warpshare.airdrop.AirDropManager
-import org.mokee.warpshare.base.Peer
+import org.mokee.warpshare.domain.data.Peer
 import org.mokee.warpshare.databinding.FragmentShareBinding
 import org.mokee.warpshare.ui.PeersAdapter
 import org.mokee.warpshare.ui.main.MainViewModel
@@ -42,8 +44,6 @@ class ShareBottomSheetFragment : BottomSheetDialogFragment() {
     private var _mBinding: FragmentShareBinding? = null
     private val mBinding: FragmentShareBinding
         get() = _mBinding!!
-
-    private var mWakeLock: PartialWakeLock? = null
 
     private val mViewModel by viewModels<MainViewModel>()
     private val mShareViewModel by viewModels<ShareViewModel>()
@@ -59,11 +59,6 @@ class ShareBottomSheetFragment : BottomSheetDialogFragment() {
         override fun onReceive(context: Context, intent: Intent) {
             setupIfNeeded()
         }
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        mWakeLock = PartialWakeLock(context, TAG)
     }
 
     override fun onCreateView(
@@ -91,19 +86,28 @@ class ShareBottomSheetFragment : BottomSheetDialogFragment() {
         mBinding.title.text = titleText
 
         mBinding.btnSend.setOnClickListener {
-            val peer = mViewModel.getSelectedPeer() ?: return@setOnClickListener
+            val peer = mViewModel.ensurePickedPeer() ?: return@setOnClickListener
+            it.isEnabled = false
             mViewModel.sendFile(peer, mShareViewModel.sendList)
         }
 
         mViewModel.peerListLiveData.observe(viewLifecycleOwner){
             mPeersAdapter.submitList(it)
         }
+
+        lifecycleScope.launch {
+            mViewModel.peerUpdateFlow.flowWithLifecycle(viewLifecycleOwner.lifecycle).collect {
+                updatePeerInfo(it)
+            }
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        mWifiStateMonitor.register(context)
-        mBluetoothStateMonitor.register(context)
+        context?.also{
+            mWifiStateMonitor.register(it)
+            mBluetoothStateMonitor.register(it)
+        }
         if (setupIfNeeded()) {
             return
         }
@@ -119,8 +123,10 @@ class ShareBottomSheetFragment : BottomSheetDialogFragment() {
             mViewModel.mIsDiscovering = false
             mViewModel.appModule.stopDiscover()
         }
-        mWifiStateMonitor.unregister(context)
-        mBluetoothStateMonitor.unregister(context)
+        context?.also{
+            mWifiStateMonitor.unregister(it)
+            mBluetoothStateMonitor.unregister(it)
+        }
     }
 
     override fun onDismiss(dialog: DialogInterface) {
@@ -144,18 +150,56 @@ class ShareBottomSheetFragment : BottomSheetDialogFragment() {
 
     private fun handleItemClick(peer: Peer) {
         mShareViewModel.peerState.apply {
-            Log.d(TAG, "handleItemClick: $this")
+            // is sending or confirming ==> return
             if(status != 0 && status != R.string.status_rejected) {
                 return
             }
         }
+
+        val previousPeer = mViewModel.mPeerPicked
+
         mShareViewModel.peerState.status = 0
-        if (peer.id == mViewModel.mPeerPicked) {
+        if (peer.id == mViewModel.mPeerPicked?.id) {
             mViewModel.mPeerPicked = null
             mBinding.btnSend.isEnabled = false
         } else {
-            mViewModel.mPeerPicked = peer.id
+            mViewModel.mPeerPicked = peer
             mBinding.btnSend.isEnabled = true
+        }
+
+        highlightSelectedItem(previousPeer, mViewModel.mPeerPicked)
+    }
+
+    /**
+     * update UI to highlight selected item
+     */
+    private fun highlightSelectedItem(previousPeer:Peer?, currentPeer:Peer?){
+        mPeersAdapter.selectedPeer = currentPeer
+        mPeersAdapter.currentList.forEachIndexed { index, peer ->
+            val isPreviousSelected = peer.id == previousPeer?.id
+            val shouldSelect = peer.id == currentPeer?.id
+            if(shouldSelect != isPreviousSelected){
+                mPeersAdapter.notifyItemChanged(index, "updateSelectItem")
+            }
+        }
+    }
+
+    /**
+     * Update the correspond Peer in the RecyclerView
+     */
+    private fun updatePeerInfo(peer: Peer?) {
+        if(peer == null) return
+        val index = mPeersAdapter.currentList.indexOfFirst { it.id == peer.id }
+        if(index == -1) return
+        mPeersAdapter.notifyItemChanged(index, "updatePeerInfo")
+
+        mShareViewModel.peerState.update(peer.status)
+        if(peer.status.status == R.string.toast_completed){
+            val ctx = context ?: return
+            Toast.makeText(ctx, R.string.toast_completed, Toast.LENGTH_SHORT).show()
+            _mBinding?.root?.postDelayed({
+                dismiss()
+            }, 1000L) ?: dismiss()
         }
     }
 

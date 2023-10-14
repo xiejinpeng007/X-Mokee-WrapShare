@@ -15,7 +15,6 @@
  */
 package org.mokee.warpshare.airdrop
 
-import android.content.Context
 import android.net.wifi.WifiManager
 import android.net.wifi.WifiManager.MulticastLock
 import android.os.Handler
@@ -31,9 +30,9 @@ import javax.jmdns.ServiceInfo
 import javax.jmdns.ServiceListener
 
 internal class AirDropNsdController(
-    context: Context,
     configManager: AirDropConfigManager,
-    parent: AirDropManager
+    parent: AirDropManager,
+    wifiManager: WifiManager,
 ) {
     private val mMulticastLock: MulticastLock
     private val mConfigManager: AirDropConfigManager
@@ -54,7 +53,6 @@ internal class AirDropNsdController(
     private val mNetworkingHandler: Handler
 
     init {
-        val wifiManager = context.getSystemService(Context.WIFI_SERVICE) as WifiManager
         mMulticastLock = wifiManager.createMulticastLock(TAG)
         mMulticastLock.setReferenceCounted(false)
         mNetworkingThread = HandlerThread("networking")

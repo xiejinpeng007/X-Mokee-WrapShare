@@ -19,13 +19,13 @@ import android.util.Log
 import com.dd.plist.NSDictionary
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import org.mokee.warpshare.MainPeerState
-import org.mokee.warpshare.base.Peer
+import org.mokee.warpshare.domain.data.PeerState
+import org.mokee.warpshare.domain.data.Peer
 
 data class AirDropPeer(
     override val id: String,
     override val name: String,
-    override val status: MainPeerState = MainPeerState(),
+    override val status: PeerState = PeerState(),
     @JvmField val url: String,
     val capabilities: JsonObject?
 ) : Peer(id, name, status) {

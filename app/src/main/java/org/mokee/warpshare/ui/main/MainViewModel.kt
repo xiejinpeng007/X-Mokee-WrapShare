@@ -6,18 +6,22 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.launch
 import org.mokee.warpshare.R
-import org.mokee.warpshare.TriggerReceiver
-import org.mokee.warpshare.WarpShareApplication
 import org.mokee.warpshare.base.DiscoverListener
-import org.mokee.warpshare.base.Entity
-import org.mokee.warpshare.base.Peer
 import org.mokee.warpshare.base.SendListener
-import org.mokee.warpshare.base.withCopy
 import org.mokee.warpshare.di.AppModule
+import org.mokee.warpshare.domain.data.Entity
+import org.mokee.warpshare.domain.data.Peer
+import org.mokee.warpshare.ui.receiver.TriggerReceiver
 
 class MainViewModel(val app: Application) : AndroidViewModel(app), DiscoverListener {
-    val appModule = AppModule(app as WarpShareApplication)
+    val appModule = AppModule
 
     var mShouldKeepDiscovering = false
 //    private set
@@ -26,10 +30,18 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), DiscoverListe
 
     var mIsInSetup = false
     var mIsDiscovering = false
-    var mPeerPicked: String? = null
+    var mPeerPicked: Peer? = null
     private val _peerListLiveData = MutableLiveData(listOf<Peer>())
     val peerListLiveData: LiveData<List<Peer>>
         get() = _peerListLiveData
+
+    private val _peerUpdateFlow = MutableSharedFlow<Peer?>()
+
+    val peerUpdateFlow: SharedFlow<Peer?> = _peerUpdateFlow.shareIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000L),
+        replay = 1
+    )
 
     fun sendFile(peer: Peer, entities: List<Entity>) {
         handleSendConfirming(peer)
@@ -43,7 +55,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), DiscoverListe
             }
 
             override fun onProgress(bytesSent: Long, bytesTotal: Long) {
-                peer.withCopy {
+                peer.also {
                     it.status.bytesSent = bytesSent
                     it.status.bytesTotal = bytesTotal
                     updatePeer(it)
@@ -61,8 +73,8 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), DiscoverListe
         peer.status.sending = appModule.send(peer, entities, listener)
     }
 
-    fun handleSendConfirming(peer: Peer) {
-        peer.withCopy {
+    private fun handleSendConfirming(peer: Peer) {
+        peer.also {
             it.status.apply {
                 status = R.string.status_waiting_for_confirm
                 bytesTotal = -1
@@ -74,7 +86,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), DiscoverListe
     }
 
     fun handleSendRejected(peer: Peer) {
-        peer.withCopy {
+        peer.also {
             it.status.status = R.string.status_rejected
             updatePeer(it)
         }
@@ -82,22 +94,22 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), DiscoverListe
     }
 
     fun handleSending(peer: Peer) {
-        peer.withCopy {
+        peer.also {
             it.status.status = R.string.status_sending
             updatePeer(it)
         }
     }
 
     fun handleSendSucceed(peer: Peer) {
-        peer.withCopy {
-            it.status.status = 0
+        peer.also {
+            it.status.status = R.string.toast_completed
             updatePeer(it)
         }
         mShouldKeepDiscovering = false
     }
 
     fun handleSendFailed(peer: Peer) {
-        peer.withCopy {
+        peer.also {
             it.status.status = 0
             updatePeer(it)
         }
@@ -109,8 +121,8 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), DiscoverListe
         return peerList.find { it.id == id }
     }
 
-    fun getSelectedPeer(): Peer? {
-        return findPeerById(mPeerPicked)
+    fun ensurePickedPeer(): Peer? {
+        return findPeerById(mPeerPicked?.id)
     }
 
     override fun onPeerFound(peer: Peer) {
@@ -122,31 +134,21 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), DiscoverListe
     }
 
     override fun onPeerDisappeared(peer: Peer) {
-        Log.d(TAG, "Disappeared: " + peer.id + " (" + peer.name + ")")
+        Log.d(TAG, "Disappeared:${Thread.currentThread().name} " + peer.id + " (" + peer.name + ")")
         peerList = peerList.filter { it.id != peer.id }
         _peerListLiveData.value = peerList
     }
 
     fun updatePeer(peer: Peer) {
-        Log.d(TAG, "updatePeer: $peer")
-        val oldPos = peerList.indexOfFirst { it.id == peer.id }
-        if (oldPos == -1) return
-        peerList = peerList.toMutableList().apply {
-            set(oldPos, peer)
+        viewModelScope.launch {
+            _peerUpdateFlow.emit(peer)
         }
-        _peerListLiveData.value = peerList
     }
 
     fun onSuccessConfigAirDrop(context: Context) {
         mIsInSetup = false
         val intent = TriggerReceiver.getTriggerIntent(context)
         appModule.mAirDropManager.registerTrigger(intent)
-    }
-
-
-    override fun onCleared() {
-        super.onCleared()
-        appModule.destroy()
     }
 
     companion object {

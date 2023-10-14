@@ -37,7 +37,7 @@ internal class AirDropClient(certificateManager: CertificateManager) {
         mHttpClient = OkHttpClient.Builder()
             .socketFactory(LinkLocalAddressSocketFactory())
             .sslSocketFactory(
-                certificateManager.sslContext.socketFactory,
+                certificateManager.sSLContext.socketFactory,
                 certificateManager.trustManagers[0] as X509TrustManager
             )
             .hostnameVerifier { _, _ -> true }
@@ -65,18 +65,18 @@ internal class AirDropClient(certificateManager: CertificateManager) {
 
     fun post(url: String, input: InputStream, callback: AirDropClientCallback): Call {
         return post(
-            url, object : RequestBody() {
+            url = url,
+            body = object : RequestBody() {
                 override fun contentType(): MediaType {
                     return "application/x-cpio".toMediaType()
                 }
 
-                @Throws(IOException::class)
                 override fun writeTo(sink: BufferedSink) {
                     sink.writeAll(input.source())
                     input.close()
                 }
             },
-            callback
+            callback = callback
         )
     }
 
@@ -98,6 +98,7 @@ internal class AirDropClient(certificateManager: CertificateManager) {
             }
 
             override fun onResponse(call: Call, response: Response) {
+                Log.d(TAG, "onResponse $url ${response.code}")
                 val statusCode = response.code
                 if (statusCode != 200) {
                     postFailure(callback, IOException("Request failed: $statusCode"))
@@ -112,6 +113,8 @@ internal class AirDropClient(certificateManager: CertificateManager) {
                     val root = PropertyListParser.parse(responseBody.byteStream()) as? NSDictionary
                     if (root != null) {
                         postResponse(callback, root)
+                    }else if(url.endsWith("/Upload")){
+                        postResponse(callback, NSDictionary())
                     }
                 } catch (e: Exception) {
                     postFailure(callback, IOException(e))
@@ -122,10 +125,12 @@ internal class AirDropClient(certificateManager: CertificateManager) {
     }
 
     private fun postResponse(callback: AirDropClientCallback, response: NSDictionary) {
+        Log.d(TAG, "postResponse: ${response}")
         mHandler.post { callback.onResponse(response) }
     }
 
     private fun postFailure(callback: AirDropClientCallback, e: IOException) {
+        Log.d(TAG, "postFailure: ${e.message}")
         mHandler.post { callback.onFailure(e) }
     }
 

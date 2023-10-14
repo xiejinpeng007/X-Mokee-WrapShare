@@ -18,7 +18,7 @@ package org.mokee.warpshare.airdrop
 import android.graphics.Bitmap
 import com.gemalto.jp2.JP2Decoder
 import com.gemalto.jp2.JP2Encoder
-import org.mokee.warpshare.base.Entity
+import org.mokee.warpshare.domain.data.Entity
 
 internal object AirDropThumbnailUtil {
     private const val SIZE = 540

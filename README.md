@@ -1,4 +1,4 @@
-# X-Mokee-WrapShare
+# X-Mokee-WarpShare
 
 内置在魔趣(Mokee)Rom 中的`跃传`没有单独发布 apk ，移植了一下做了一些调整。
 

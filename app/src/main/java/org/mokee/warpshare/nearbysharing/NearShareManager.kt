@@ -46,89 +46,87 @@ import com.microsoft.connecteddevices.remotesystems.commanding.nearshare.NearSha
 import com.microsoft.connecteddevices.remotesystems.commanding.nearshare.NearShareStatus
 import org.mokee.warpshare.base.DiscoverListener
 import org.mokee.warpshare.base.Discoverer
-import org.mokee.warpshare.base.Entity
+import org.mokee.warpshare.domain.data.Entity
 import org.mokee.warpshare.base.SendListener
 import org.mokee.warpshare.base.Sender
 import org.mokee.warpshare.base.SendingSession
 import java.util.concurrent.atomic.AtomicBoolean
 
-class NearShareManager(context: Context) : Discoverer, Sender<NearSharePeer> {
-    private val mContext: Context
+class NearShareManager(val context: Context) : Discoverer, Sender<NearSharePeer> {
     private val mHandler = Handler(Looper.getMainLooper())
     private val mPeers: MutableMap<String, NearSharePeer> = HashMap()
-    private var mPlatform: ConnectedDevicesPlatform? = null
-    private var mRemoteSystemWatcher: RemoteSystemWatcher? = null
-    private val mNearShareSender: NearShareSender
+    private var mPlatform: ConnectedDevicesPlatform = setupPlatform(context)
+
+    private var mRemoteSystemWatcher: RemoteSystemWatcher? = setupWatcher()
+    private val mNearShareSender = NearShareSender()
     private var mDiscoverListener: DiscoverListener? = null
 
-    init {
-        mContext = context.applicationContext
-        setupPlatform(context)
-        setupAnonymousAccount()
-        setupWatcher()
-        mNearShareSender = NearShareSender()
-    }
-
     fun destroy() {
-        mPlatform!!.shutdownAsync()
+        mPlatform.shutdownAsync()
         mHandler.removeCallbacksAndMessages(null)
     }
 
-    private fun setupPlatform(context: Context) {
-        mPlatform = ConnectedDevicesPlatform(context.applicationContext)
-        val accountManager = mPlatform!!.accountManager
-        accountManager.accessTokenRequested()
-            .subscribe { manager: ConnectedDevicesAccountManager?, args: ConnectedDevicesAccessTokenRequestedEventArgs? -> }
-        accountManager.accessTokenInvalidated()
-            .subscribe { manager: ConnectedDevicesAccountManager?, args: ConnectedDevicesAccessTokenInvalidatedEventArgs? -> }
-        val registrationManager = mPlatform!!.notificationRegistrationManager
-        registrationManager.notificationRegistrationStateChanged()
-            .subscribe { manager: ConnectedDevicesNotificationRegistrationManager?, args: ConnectedDevicesNotificationRegistrationStateChangedEventArgs? -> }
-        mPlatform!!.start()
-    }
+    private fun setupPlatform(context: Context): ConnectedDevicesPlatform {
+        return ConnectedDevicesPlatform(context.applicationContext).apply {
 
-    private fun setupAnonymousAccount() {
-        val account = ConnectedDevicesAccount.getAnonymousAccount()
-        mPlatform!!.accountManager.addAccountAsync(account)
-            .whenComplete { result: ConnectedDevicesAddAccountResult?, tr: Throwable? ->
-                if (tr != null) {
-                    Log.e(TAG, "Failed creating anonymous account", tr)
+            accountManager.accessTokenRequested()
+                .subscribe { manager: ConnectedDevicesAccountManager?, args: ConnectedDevicesAccessTokenRequestedEventArgs? ->
+
                 }
-            }
+            accountManager.accessTokenInvalidated()
+                .subscribe { manager: ConnectedDevicesAccountManager?, args: ConnectedDevicesAccessTokenInvalidatedEventArgs? ->
+
+                }
+            notificationRegistrationManager.notificationRegistrationStateChanged()
+                .subscribe { manager: ConnectedDevicesNotificationRegistrationManager?, args: ConnectedDevicesNotificationRegistrationStateChangedEventArgs? ->
+
+                }
+            start()
+
+//            setupAnonymousAccount
+            val account = ConnectedDevicesAccount.getAnonymousAccount()
+            accountManager.addAccountAsync(account)
+                .whenComplete { result: ConnectedDevicesAddAccountResult?, tr: Throwable? ->
+                    if (tr != null) {
+                        Log.e(TAG, "Failed creating anonymous account", tr)
+                    }
+                }
+        }
     }
 
-    private fun setupWatcher() {
+    private fun setupWatcher(): RemoteSystemWatcher {
         val filters: MutableList<RemoteSystemFilter> = ArrayList()
         filters.add(RemoteSystemDiscoveryTypeFilter(RemoteSystemDiscoveryType.PROXIMAL))
         filters.add(RemoteSystemStatusTypeFilter(RemoteSystemStatusType.ANY))
         filters.add(RemoteSystemAuthorizationKindFilter(RemoteSystemAuthorizationKind.ANONYMOUS))
-        mRemoteSystemWatcher = RemoteSystemWatcher(filters)
-        mRemoteSystemWatcher!!.remoteSystemAdded()
-            .subscribe { watcher: RemoteSystemWatcher?, args: RemoteSystemAddedEventArgs ->
-                val peer = NearSharePeer.from(args.remoteSystem)
-                val connectionRequest = RemoteSystemConnectionRequest(peer.remoteSystem)
-                if (mNearShareSender.isNearShareSupported(connectionRequest)) {
-                    Log.d(TAG, "Found: " + peer.id + " (" + peer.name + ")")
-                    mPeers[peer.id] = peer
-                    mHandler.post { mDiscoverListener!!.onPeerFound(peer) }
+        return RemoteSystemWatcher(filters).apply {
+            remoteSystemAdded()
+                .subscribe { _: RemoteSystemWatcher?, args: RemoteSystemAddedEventArgs ->
+                    val peer = NearSharePeer.from(args.remoteSystem)
+                    val connectionRequest = RemoteSystemConnectionRequest(peer.remoteSystem)
+                    if (mNearShareSender.isNearShareSupported(connectionRequest)) {
+                        Log.d(TAG, "Found: " + peer.id + " (" + peer.name + ")")
+                        mPeers[peer.id] = peer
+                        mHandler.post { mDiscoverListener?.onPeerFound(peer) }
+                    }
                 }
-            }
-        mRemoteSystemWatcher!!.remoteSystemRemoved()
-            .subscribe { watcher: RemoteSystemWatcher?, args: RemoteSystemRemovedEventArgs ->
-                val peer = mPeers.remove(args.remoteSystem.id)
-                if (peer != null) {
-                    mHandler.post { mDiscoverListener!!.onPeerDisappeared(peer) }
+            remoteSystemRemoved()
+                .subscribe { _: RemoteSystemWatcher?, args: RemoteSystemRemovedEventArgs ->
+                    val peer = mPeers.remove(args.remoteSystem.id)
+                    if (peer != null) {
+                        mHandler.post { mDiscoverListener?.onPeerDisappeared(peer) }
+                    }
                 }
-            }
+        }
     }
 
     override fun startDiscover(discoverListener: DiscoverListener) {
         mDiscoverListener = discoverListener
-        mRemoteSystemWatcher!!.start()
+        mRemoteSystemWatcher?.start()
     }
 
     override fun stopDiscover() {
-        mRemoteSystemWatcher!!.stop()
+        mRemoteSystemWatcher?.stop()
     }
 
     override fun send(
@@ -140,14 +138,14 @@ class NearShareManager(context: Context) : Discoverer, Sender<NearSharePeer> {
         val operation: AsyncOperationWithProgress<NearShareStatus, NearShareProgress>
         if (entities.size == 1) {
             val fileProvider = NearShareHelper.createNearShareFileFromContentUri(
-                entities[0].uri, mContext
+                entities[0].uri, context
             )
             operation = mNearShareSender.sendFileAsync(connectionRequest, fileProvider)
         } else {
             val fileProviders = arrayOfNulls<NearShareFileProvider>(entities.size)
             for (i in entities.indices) {
                 fileProviders[i] = NearShareHelper.createNearShareFileFromContentUri(
-                    entities[i].uri, mContext
+                    entities[i].uri, context
                 )
             }
             operation = mNearShareSender.sendFilesAsync(connectionRequest, fileProviders)

@@ -34,18 +34,17 @@ class PermissionUtil(private val onRes: ((Map<String, Boolean>) -> Unit)? = null
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
             val contract = ActivityResultContracts.RequestMultiplePermissions()
-            mRequestBLELauncher31 = caller?.registerForActivityResult(contract) {res ->
+            mRequestBLELauncher31 = caller?.registerForActivityResult(contract) {
                 requestToTurnOnBle()
             }
         }else {
             mRequestBLELauncher =
                 caller?.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                     if (result.resultCode == Activity.RESULT_OK) {
-                        //granted
-                    } else {
                         // TODO
+                    } else {
                         Toast.makeText(
-                            WarpShareApplication.getInstance(),
+                            WarpShareApplication.instance,
                             "Failed",
                             Toast.LENGTH_SHORT
                         ).show()
@@ -100,7 +99,7 @@ class PermissionUtil(private val onRes: ((Map<String, Boolean>) -> Unit)? = null
         @JvmStatic
         fun checkPermission(permissions:Array<String>): Boolean {
             val failedCount = permissions.map {
-                WarpShareApplication.getInstance().checkSelfPermission(it) == PackageManager.PERMISSION_GRANTED
+                WarpShareApplication.instance.checkSelfPermission(it) == PackageManager.PERMISSION_GRANTED
             }.count { !it }
             return failedCount == 0
         }

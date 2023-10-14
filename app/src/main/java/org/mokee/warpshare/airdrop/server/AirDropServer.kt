@@ -19,6 +19,7 @@ import okio.Pipe
 import okio.buffer
 import org.mokee.warpshare.airdrop.AirDropManager
 import org.mokee.warpshare.certificate.CertificateManager
+import org.mokee.warpshare.di.AppModule2
 import java.io.IOException
 import java.io.InputStream
 import java.net.InetAddress
@@ -30,7 +31,7 @@ class AirDropServer internal constructor(
     private var mServer: AsyncHttpServer? = null
     fun start(host: String): Int {
         mServer = AsyncHttpServer()
-        mServer?.listenSecure(PORT, mCertificateManager.sslContext)
+        mServer?.listenSecure(PORT, mCertificateManager.sSLContext)
         mServer?.post("/Discover", object : NSDictionaryHttpServerRequestCallback() {
             override fun onRequest(
                 remote: InetAddress, request: NSDictionary,

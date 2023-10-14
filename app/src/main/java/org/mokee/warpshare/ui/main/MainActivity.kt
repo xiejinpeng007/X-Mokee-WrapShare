@@ -19,6 +19,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
@@ -27,33 +28,35 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import org.mokee.warpshare.BluetoothStateMonitor
-import org.mokee.warpshare.PartialWakeLock
-import org.mokee.warpshare.ui.PeersAdapter
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import org.mokee.warpshare.R
-import org.mokee.warpshare.ui.settings.SettingsActivity
-import org.mokee.warpshare.TriggerReceiver
-import org.mokee.warpshare.WifiStateMonitor
 import org.mokee.warpshare.airdrop.AirDropManager
-import org.mokee.warpshare.base.Entity
-import org.mokee.warpshare.base.Peer
+import org.mokee.warpshare.domain.data.Entity
+import org.mokee.warpshare.domain.data.Peer
 import org.mokee.warpshare.databinding.ActivityMainBinding
+import org.mokee.warpshare.ui.PeersAdapter
+import org.mokee.warpshare.ui.receiver.BluetoothStateMonitor
+import org.mokee.warpshare.ui.receiver.TriggerReceiver
+import org.mokee.warpshare.ui.receiver.WifiStateMonitor
+import org.mokee.warpshare.ui.settings.SettingsActivity
 import org.mokee.warpshare.ui.setup.SetupFragment
 
 class MainActivity : AppCompatActivity() {
     private val mPeersAdapter = PeersAdapter(this::onItemClick, this::onItemCancelClick)
-    private var mWakeLock: PartialWakeLock? = null
     private val mViewModel by viewModels<MainViewModel>()
     private lateinit var mBinding: ActivityMainBinding
 
     private var mPickFileLauncher: ActivityResultLauncher<String>? = null
 
-    private val mWifiStateMonitor: WifiStateMonitor = object : WifiStateMonitor() {
+    private val mWifiStateMonitor = object : WifiStateMonitor() {
         override fun onReceive(context: Context, intent: Intent) {
             setupIfNeeded()
         }
     }
-    private val mBluetoothStateMonitor: BluetoothStateMonitor = object : BluetoothStateMonitor() {
+    private val mBluetoothStateMonitor = object : BluetoothStateMonitor() {
         override fun onReceive(context: Context, intent: Intent) {
             setupIfNeeded()
         }
@@ -68,22 +71,19 @@ class MainActivity : AppCompatActivity() {
             this.onGetMultipleContent(it)
         }
 
-        mWakeLock = PartialWakeLock(this, TAG)
-
-        mViewModel.appModule.mAirDropManager.registerTrigger(TriggerReceiver.getTriggerIntent(this));
+        mViewModel.appModule.mAirDropManager.registerTrigger(TriggerReceiver.getTriggerIntent(this))
         mBinding.recyclerViewPeers.adapter = mPeersAdapter
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         mViewModel.peerListLiveData.observe(this) {
             mPeersAdapter.submitList(it)
         }
+        lifecycleScope.launch {
+            mViewModel.peerUpdateFlow.flowWithLifecycle(lifecycle).collect {
+                updatePeerInfo(it)
+            }
+        }
     }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        mViewModel.appModule.destroy()
-    }
-
     override fun onResume() {
         super.onResume()
         mWifiStateMonitor.register(this)
@@ -105,6 +105,11 @@ class MainActivity : AppCompatActivity() {
         }
         mWifiStateMonitor.unregister(this)
         mBluetoothStateMonitor.unregister(this)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        mPickFileLauncher?.unregister()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -139,7 +144,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onItemClick(peer: Peer) {
-        mViewModel.mPeerPicked = peer.id
+        mViewModel.mPeerPicked = peer
         mViewModel.mShouldKeepDiscovering = true
         mPickFileLauncher?.launch("*/*")
     }
@@ -149,17 +154,28 @@ class MainActivity : AppCompatActivity() {
         mViewModel.handleSendFailed(peer)
     }
 
+    /**
+     * 选择文件后的回调
+     */
     private fun onGetMultipleContent(uriList:List<Uri>){
+        Log.d(TAG, "onGetMultipleContent: ${uriList.joinToString()}")
         mViewModel.mShouldKeepDiscovering = false
-        val prePickedPeerId = mViewModel.mPeerPicked
-        val peer = mViewModel.findPeerById(prePickedPeerId) ?: return
+        val peer = mViewModel.ensurePickedPeer() ?: return
         val applicationContext = application ?: return
-        mViewModel.sendFile(peer, uriList.map{ Entity(applicationContext, it, "")})
+        mViewModel.sendFile(peer, uriList.map{ Entity(applicationContext, it, "") })
+    }
+
+    private fun updatePeerInfo(peer: Peer?){
+        if(peer == null) {
+            return
+        }
+        val desireIndex = mPeersAdapter.currentList.indexOfFirst { it.id == peer.id }
+        if(desireIndex != -1) {
+            mPeersAdapter.notifyItemChanged(desireIndex, "updatePeerInfo")
+        }
     }
 
     companion object {
         private const val TAG = "MainActivity"
-        private const val REQUEST_PICK = 1
-        private const val REQUEST_SETUP = 2
     }
 }

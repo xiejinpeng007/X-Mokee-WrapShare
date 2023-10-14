@@ -13,13 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.mokee.warpshare
 
-package org.mokee.warpshare;
+import android.app.Application
+import android.content.Context
+import org.mokee.warpshare.certificate.CertificateManager
 
-import android.bluetooth.BluetoothAdapter;
+class WarpShareApplication : Application() {
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(base)
+        sInstance = this
+    }
 
-public abstract class BluetoothStateMonitor extends SelfBroadcastReceiver {
-    public BluetoothStateMonitor() {
-        super(BluetoothAdapter.ACTION_STATE_CHANGED);
+    companion object {
+        private lateinit var sInstance: WarpShareApplication
+        val instance: Application
+            get() = sInstance
     }
 }

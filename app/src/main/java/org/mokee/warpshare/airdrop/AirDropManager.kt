@@ -16,7 +16,7 @@
 package org.mokee.warpshare.airdrop
 
 import android.app.PendingIntent
-import android.content.Context
+import android.bluetooth.BluetoothManager
 import android.graphics.Bitmap
 import android.os.Handler
 import android.os.Looper
@@ -37,7 +37,7 @@ import org.mokee.warpshare.airdrop.server.AirDropServer
 import org.mokee.warpshare.airdrop.server.ResultCallback
 import org.mokee.warpshare.base.DiscoverListener
 import org.mokee.warpshare.base.Discoverer
-import org.mokee.warpshare.base.Entity
+import org.mokee.warpshare.domain.data.Entity
 import org.mokee.warpshare.base.SendListener
 import org.mokee.warpshare.base.Sender
 import org.mokee.warpshare.base.SendingSession
@@ -49,9 +49,13 @@ import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
-class AirDropManager(context: Context, certificateManager: CertificateManager) : Discoverer,
+class AirDropManager(
+    bleManager: BluetoothManager,
+    wifiManager: android.net.wifi.WifiManager,
+    certificateManager: CertificateManager
+) : Discoverer,
     Sender<AirDropPeer> {
-    private val mConfigManager: AirDropConfigManager
+    private val mConfigManager = AirDropConfigManager()
     private val mBleController: AirDropBleController
     private val mNsdController: AirDropNsdController
     private val mWlanController: AirDropWlanController
@@ -65,9 +69,8 @@ class AirDropManager(context: Context, certificateManager: CertificateManager) :
     private val mMainThreadHandler = Handler(Looper.getMainLooper())
 
     init {
-        mConfigManager = AirDropConfigManager(context)
-        mBleController = AirDropBleController(context)
-        mNsdController = AirDropNsdController(context, mConfigManager, this)
+        mBleController = AirDropBleController(bleManager)
+        mNsdController = AirDropNsdController(mConfigManager, this, wifiManager)
         mWlanController = AirDropWlanController()
         mClient = AirDropClient(certificateManager)
         mServer = AirDropServer(certificateManager, this)
@@ -77,7 +80,7 @@ class AirDropManager(context: Context, certificateManager: CertificateManager) :
     private fun totalLength(entities: List<Entity>): Long {
         var total: Long = -1
         for (entity in entities) {
-            val size = entity.size()
+            val size = entity.size
             if (size >= 0) {
                 if (total == -1L) {
                     total = size
@@ -153,7 +156,7 @@ class AirDropManager(context: Context, certificateManager: CertificateManager) :
             override fun onResponse(response: NSDictionary) {
                 val peer = from(response, id, url) ?: return
                 mPeers[id] = peer
-                mDiscoverListener!!.onPeerFound(peer)
+                mDiscoverListener?.onPeerFound(peer)
             }
         })
     }
@@ -161,7 +164,7 @@ class AirDropManager(context: Context, certificateManager: CertificateManager) :
     fun onServiceLost(id: String) {
         val peer = mPeers.remove(id)
         if (peer != null) {
-            mDiscoverListener!!.onPeerDisappeared(peer)
+            mDiscoverListener?.onPeerDisappeared(peer)
         }
     }
 
@@ -173,7 +176,7 @@ class AirDropManager(context: Context, certificateManager: CertificateManager) :
         Log.d(TAG, "Asking " + peer.id + " to receive " + entities.size + " files")
         val ref = AtomicReference<Cancelable>()
         val thumbnailCanceled = AtomicBoolean(false)
-        val firstType = entities[0].type()
+        val firstType = entities[0].type
         if (!TextUtils.isEmpty(firstType) && firstType.startsWith("image/")) {
             ref.set(object:Cancelable {
                 override fun cancel() {
@@ -214,9 +217,9 @@ class AirDropManager(context: Context, certificateManager: CertificateManager) :
         val files: MutableList<NSDictionary> = ArrayList()
         for (entity in entities) {
             val file = NSDictionary()
-            file.put("FileName", entity.name())
+            file.put("FileName", entity.name)
             file.put("FileType", AirDropTypes.getEntryType(entity))
-            file.put("FileBomPath", entity.path())
+            file.put("FileBomPath", entity.path)
             file.put("FileIsDirectory", false)
             file.put("ConvertMediaFormats", 0)
             files.add(file)
@@ -248,7 +251,8 @@ class AirDropManager(context: Context, certificateManager: CertificateManager) :
 
     private fun upload(
         ref: AtomicReference<Cancelable>, peer: AirDropPeer,
-        entities: List<Entity>, listener: SendListener
+        entities: List<Entity>,
+        listener: SendListener
     ) {
         val archive = Pipe(1024)
         val bytesTotal = totalLength(entities)
@@ -262,9 +266,11 @@ class AirDropManager(context: Context, certificateManager: CertificateManager) :
                 mMainThreadHandler.post { listener.onProgress(bytesSent, bytesTotal) }
             }
         }
-        val call = mClient.post(peer.url + "/Upload",
-            archive.source.buffer().inputStream(),
-            object : AirDropClientCallback {
+        val inputStream = archive.source.buffer().inputStream()
+        val call = mClient.post(
+            url = "${peer.url}/Upload",
+            input = inputStream,
+            callback = object : AirDropClientCallback {
                 override fun onFailure(e: IOException) {
                     Log.e(TAG, "Failed to upload: " + peer.id, e)
                     ref.set(null)
@@ -389,12 +395,9 @@ class AirDropManager(context: Context, certificateManager: CertificateManager) :
                 }
 
                 override fun cancel() {
-                    if (stream != null) {
-                        try {
-                            stream!!.close()
-                        } catch (ignored: IOException) {
-                        }
-                        stream = null
+                    try {
+                        stream?.close()
+                    } catch (_: Exception) {
                     }
                     mReceivingSessions.remove(ip)
                 }
@@ -449,14 +452,14 @@ class AirDropManager(context: Context, certificateManager: CertificateManager) :
             try {
                 AirDropArchiveUtil.unpack(stream, HashSet(session.paths), fileFactory)
                 mMainThreadHandler.post {
-                    mReceiverListener!!.onAirDropTransferDone(session)
+                    mReceiverListener?.onAirDropTransferDone(session)
                     mReceivingSessions.remove(ip)
                     callback.call(NSDictionary())
                 }
             } catch (e: IOException) {
                 Log.e(TAG, "Failed receiving files", e)
                 mMainThreadHandler.post {
-                    mReceiverListener!!.onAirDropTransferFailed(session)
+                    mReceiverListener?.onAirDropTransferFailed(session)
                     mReceivingSessions.remove(ip)
                     callback.call(null)
                 }

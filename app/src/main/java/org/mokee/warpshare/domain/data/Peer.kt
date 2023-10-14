@@ -13,22 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.mokee.warpshare.base
+package org.mokee.warpshare.domain.data
 
-import org.mokee.warpshare.MainPeerState
 import org.mokee.warpshare.airdrop.AirDropPeer
 import org.mokee.warpshare.nearbysharing.NearSharePeer
 
 open class Peer(
     open val id: String,
     open val name: String,
-    open val status: MainPeerState = MainPeerState(),
+    open val status: PeerState = PeerState(),
 ) {
 
     fun basicCopy(
         id: String = this.id,
         name: String = this.name,
-        status: MainPeerState = this.status.copy(),
+        status: PeerState = this.status.copy(),
     ): Peer {
         return Peer(id, name, status)
     }

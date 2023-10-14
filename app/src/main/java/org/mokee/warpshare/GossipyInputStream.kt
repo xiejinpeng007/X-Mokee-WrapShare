@@ -15,29 +15,34 @@
  */
 package org.mokee.warpshare
 
-import android.os.PowerManager
-import android.os.PowerManager.WakeLock
-import android.util.Log
+import java.io.InputStream
 
-class PartialWakeLock(powerManager: PowerManager, val tag: String) {
-    private var mWakeLock: WakeLock? = null
-
-    init {
-        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, tag)
-        mWakeLock?.setReferenceCounted(false)
+class GossipyInputStream(
+    private val mSource: InputStream,
+    private val mListener: Listener
+) : InputStream() {
+    override fun read(): Int {
+        val buf = ByteArray(1)
+        val ret = read(buf)
+        return if (ret == -1) -1 else buf[0].toInt()
     }
 
-    fun acquire() {
-        Log.d(TAG, "$tag lock acquire")
-        mWakeLock?.acquire(10 * 60 * 1000L /*10 minutes*/)
+    override fun read(b: ByteArray, off: Int, len: Int): Int {
+        val ret = mSource.read(b, off, len)
+        return if (ret == -1) {
+            -1
+        } else {
+            mListener.onRead(ret)
+            ret
+        }
     }
 
-    fun release() {
-        Log.d(TAG, "$tag lock release")
-        mWakeLock?.release()
+    override fun close() {
+        super.close()
+        mSource.close()
     }
 
-    companion object {
-        private const val TAG = "PartialWakeLock"
+    interface Listener {
+        fun onRead(length: Int)
     }
 }

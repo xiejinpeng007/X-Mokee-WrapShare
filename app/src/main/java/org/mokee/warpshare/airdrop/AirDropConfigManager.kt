@@ -15,24 +15,18 @@
  */
 package org.mokee.warpshare.airdrop
 
-import android.content.Context
-import android.content.SharedPreferences
 import android.util.Log
-import androidx.preference.PreferenceManager
 import okio.ByteString
 import org.mokee.warpshare.ConfigManager
+import org.mokee.warpshare.di.AppModule2
 import java.util.Random
 
-internal class AirDropConfigManager(context: Context) {
-    private val mParent: ConfigManager
-    private val mPref: SharedPreferences
+class AirDropConfigManager {
 
     init {
-        mParent = ConfigManager(context)
-        mPref = PreferenceManager.getDefaultSharedPreferences(context)
-        if (!mPref.contains(KEY_ID)) {
-            mPref.edit().putString(KEY_ID, generateId()).apply()
-            Log.d(TAG, "Generate id: " + mPref.getString(KEY_ID, null))
+        if (!AppModule2.mPref.contains(KEY_ID)) {
+            AppModule2.mPref.edit().putString(KEY_ID, generateId()).apply()
+            Log.d(TAG, "Generate id: " + AppModule2.mPref.getString(KEY_ID, null))
         }
     }
 
@@ -43,11 +37,11 @@ internal class AirDropConfigManager(context: Context) {
     }
 
     val id: String?
-        get() = mPref.getString(KEY_ID, null)
+        get() = AppModule2.mPref.getString(KEY_ID, null)
     val name: String
-        get() = mParent.name
+        get() = ConfigManager.name
     val isDiscoverable: Boolean
-        get() = mParent.isDiscoverable
+        get() = ConfigManager.isDiscoverable
 
     companion object {
         private const val TAG = "AirDropConfigManager"

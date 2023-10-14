@@ -7,12 +7,12 @@ interface ReceiverListener {
     fun onAirDropRequestCanceled(session: ReceivingSession)
     fun onAirDropTransfer(
         session: ReceivingSession,
-        fileName: String?,
-        input: InputStream?
+        fileName: String,
+        input: InputStream
     )
 
     fun onAirDropTransferProgress(
-        session: ReceivingSession, fileName: String?,
+        session: ReceivingSession, fileName: String,
         bytesReceived: Long, bytesTotal: Long,
         index: Int, count: Int
     )

@@ -16,6 +16,8 @@
 
 package org.mokee.warpshare.base;
 
+import org.mokee.warpshare.domain.data.Peer;
+
 public interface DiscoverListener {
 
     void onPeerFound(Peer peer);

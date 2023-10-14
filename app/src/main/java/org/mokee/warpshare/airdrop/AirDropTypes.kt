@@ -16,15 +16,15 @@
 package org.mokee.warpshare.airdrop
 
 import android.text.TextUtils
-import org.mokee.warpshare.base.Entity
+import org.mokee.warpshare.domain.data.Entity
 import java.util.Locale
 
 internal object AirDropTypes {
     fun getEntryType(entity: Entity): String {
-        val mime = entity.type()
+        val mime = entity.type
         if (!TextUtils.isEmpty(mime)) {
             if (mime.startsWith("image/")) {
-                val name = entity.name().lowercase(Locale.getDefault())
+                val name = entity.name.lowercase(Locale.getDefault())
                 return if (name.endsWith(".jpg") || name.endsWith(".jpeg")) {
                     "public.jpeg"
                 } else if (name.endsWith(".jp2")) {

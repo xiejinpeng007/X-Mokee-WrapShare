@@ -4,21 +4,20 @@ import org.mokee.warpshare.WarpShareApplication
 import org.mokee.warpshare.airdrop.AirDropManager
 import org.mokee.warpshare.airdrop.AirDropPeer
 import org.mokee.warpshare.base.DiscoverListener
-import org.mokee.warpshare.base.Entity
-import org.mokee.warpshare.base.Peer
+import org.mokee.warpshare.domain.data.Entity
+import org.mokee.warpshare.domain.data.Peer
 import org.mokee.warpshare.base.SendListener
 import org.mokee.warpshare.base.SendingSession
 import org.mokee.warpshare.nearbysharing.NearShareManager
 import org.mokee.warpshare.nearbysharing.NearSharePeer
 
-class AppModule(private val warpApp: WarpShareApplication) {
+object AppModule {
     val mAirDropManager by lazy {
-        AirDropManager(warpApp, warpApp.certificateManager)
+        AirDropManager(AppModule2.bleManager, AppModule2.wifiManager, AppModule2.certificateManager)
     }
     val mNearShareManager by lazy {
-        NearShareManager(warpApp)
+        NearShareManager(WarpShareApplication.instance)
     }
-
 
     fun startDiscover(discoverListener: DiscoverListener) {
         mAirDropManager.startDiscover(discoverListener)
