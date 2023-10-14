@@ -137,7 +137,7 @@ class AirDropServer internal constructor(
             val body = request.getBody<AsyncHttpRequestBody<*>>() as UnknownRequestBody
             val emitter = body.emitter
             val pipe = Pipe(Long.MAX_VALUE)
-            emitter.dataCallback = DataCallback { emitter1: DataEmitter?, bb: ByteBufferList ->
+            emitter.dataCallback = DataCallback { _: DataEmitter?, bb: ByteBufferList ->
                 try {
                     Buffer().use { buffer ->
                         buffer.write(bb.allByteArray)

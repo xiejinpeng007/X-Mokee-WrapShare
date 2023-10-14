@@ -13,15 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.mokee.warpshare.base
 
-package org.mokee.warpshare.base;
-
-import org.mokee.warpshare.domain.data.Peer;
-
-public interface DiscoverListener {
-
-    void onPeerFound(Peer peer);
-
-    void onPeerDisappeared(Peer peer);
-
+abstract class SendingSession {
+    abstract fun cancel()
 }

@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.mokee.warpshare.base
 
-package org.mokee.warpshare.base;
+import org.mokee.warpshare.domain.data.Entity
+import org.mokee.warpshare.domain.data.Peer
 
-public abstract class SendingSession {
-
-    public abstract void cancel();
-
+interface Sender<P : Peer?> {
+    fun send(peer: P, entities: List<Entity>, listener: SendListener): SendingSession?
 }

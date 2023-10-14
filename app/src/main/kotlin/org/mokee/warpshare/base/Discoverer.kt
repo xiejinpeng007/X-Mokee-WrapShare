@@ -13,13 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.mokee.warpshare.base
 
-package org.mokee.warpshare.base;
-
-public interface Discoverer {
-
-    void startDiscover(DiscoverListener discoverListener);
-
-    void stopDiscover();
-
+interface Discoverer {
+    fun startDiscover(discoverListener: DiscoverListener)
+    fun stopDiscover()
 }

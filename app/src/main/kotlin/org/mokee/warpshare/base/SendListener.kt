@@ -13,19 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.mokee.warpshare.base
 
-package org.mokee.warpshare.base;
-
-public interface SendListener {
-
-    void onAccepted();
-
-    void onRejected();
-
-    void onProgress(long bytesSent, long bytesTotal);
-
-    void onSent();
-
-    void onSendFailed();
-
+interface SendListener {
+    fun onAccepted()
+    fun onRejected()
+    fun onProgress(bytesSent: Long, bytesTotal: Long)
+    fun onSent()
+    fun onSendFailed()
 }

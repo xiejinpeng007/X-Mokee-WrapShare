@@ -13,16 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.mokee.warpshare.base
 
-package org.mokee.warpshare.base;
+import org.mokee.warpshare.domain.data.Peer
 
-import org.mokee.warpshare.domain.data.Entity;
-import org.mokee.warpshare.domain.data.Peer;
-
-import java.util.List;
-
-public interface Sender<P extends Peer> {
-
-    SendingSession send(P peer, List<Entity> entities, SendListener listener);
-
+interface DiscoverListener {
+    fun onPeerFound(peer: Peer)
+    fun onPeerDisappeared(peer: Peer)
 }
