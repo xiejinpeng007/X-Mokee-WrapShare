@@ -26,8 +26,19 @@ public class WarpShareApplication extends Application {
 
     private CertificateManager mCertificateManager;
 
+    private static WarpShareApplication sInstance;
+    public static Application getInstance() {
+        return sInstance;
+    }
+
     public static WarpShareApplication from(Context context) {
         return (WarpShareApplication) context.getApplicationContext();
+    }
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        sInstance = this;
     }
 
     @Override

@@ -19,11 +19,19 @@ import com.microsoft.connecteddevices.remotesystems.RemoteSystem
 import org.mokee.warpshare.MainPeerState
 import org.mokee.warpshare.base.Peer
 
-class NearSharePeer(id: String, name: String, val remoteSystem: RemoteSystem) :
-    Peer(id, name, MainPeerState()) {
+data class NearSharePeer(
+    override val id: String,
+    override val name: String,
+    override val status: MainPeerState = MainPeerState(),
+    val remoteSystem: RemoteSystem
+) : Peer(id, name, status) {
     companion object {
         fun from(system: RemoteSystem): NearSharePeer {
-            return NearSharePeer(system.id, system.displayName ?: "", system)
+            return NearSharePeer(
+                id = system.id,
+                name = system.displayName ?: "",
+                remoteSystem = system
+            )
         }
     }
 }

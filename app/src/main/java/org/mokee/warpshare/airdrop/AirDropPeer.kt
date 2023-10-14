@@ -19,14 +19,16 @@ import android.util.Log
 import com.dd.plist.NSDictionary
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import org.mokee.warpshare.MainPeerState
 import org.mokee.warpshare.base.Peer
 
-class AirDropPeer private constructor(
-    id: String,
-    name: String,
+data class AirDropPeer(
+    override val id: String,
+    override val name: String,
+    override val status: MainPeerState = MainPeerState(),
     @JvmField val url: String,
     val capabilities: JsonObject?
-) : Peer(id, name) {
+) : Peer(id, name, status) {
     val mokeeApiVersion: Int
         get() {
             if (capabilities == null) {
@@ -53,12 +55,12 @@ class AirDropPeer private constructor(
             if (capabilitiesNode != null) {
                 val caps = capabilitiesNode.toJavaObject(ByteArray::class.java)
                 try {
-                    capabilities = JsonParser().parse(String(caps)) as JsonObject
+                    capabilities = JsonParser.parseString(String(caps)) as JsonObject
                 } catch (e: Exception) {
                     Log.e(TAG, "Error parsing ReceiverMediaCapabilities", e)
                 }
             }
-            return AirDropPeer(id, name, url, capabilities)
+            return AirDropPeer(id = id, name = name, url = url, capabilities = capabilities)
         }
     }
 }

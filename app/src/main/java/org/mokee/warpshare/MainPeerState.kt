@@ -9,4 +9,9 @@ data class MainPeerState(
     var bytesTotal: Long = -1,
     var bytesSent: Long = 0,
     var sending: SendingSession? = null,
-)
+){
+    fun cancelSend(){
+        sending?.cancel()
+        sending = null
+    }
+}

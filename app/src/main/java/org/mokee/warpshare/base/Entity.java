@@ -16,7 +16,10 @@
 
 package org.mokee.warpshare.base;
 
-import android.content.Context;
+import static android.content.ContentResolver.SCHEME_FILE;
+import static androidx.core.content.FileProvider.getUriForFile;
+
+import android.app.Application;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -32,17 +35,13 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.concurrent.ExecutionException;
 
-import static android.content.ContentResolver.SCHEME_FILE;
-import static androidx.core.content.FileProvider.getUriForFile;
-
-@SuppressWarnings("WeakerAccess")
 public class Entity {
 
     private static final String TAG = "Entity";
 
     public final Uri uri;
 
-    private final Context mContext;
+    private final Application app;
 
     private boolean mOk = false;
 
@@ -51,8 +50,8 @@ public class Entity {
     private String mType;
     private long mSize;
 
-    public Entity(Context context, Uri uri, String type) {
-        mContext = context;
+    public Entity(Application app, Uri uri, String type) {
+        this.app = app;
 
         if (uri == null) {
             this.uri = null;
@@ -60,7 +59,7 @@ public class Entity {
         }
 
         if (SCHEME_FILE.equals(uri.getScheme())) {
-            uri = generateContentUri(context, uri);
+            uri = generateContentUri(uri);
             if (uri == null) {
                 this.uri = null;
                 return;
@@ -72,7 +71,7 @@ public class Entity {
         Cursor cursor;
 
         try {
-            cursor = context.getContentResolver().query(
+            cursor = app.getContentResolver().query(
                     uri, null, null, null, null);
         } catch (SecurityException e) {
             Log.e(TAG, "Failed resolving uri: " + uri, e);
@@ -96,13 +95,13 @@ public class Entity {
         cursor.close();
 
         if (TextUtils.isEmpty(mType)) {
-            mType = context.getContentResolver().getType(uri);
+            mType = app.getContentResolver().getType(uri);
         }
 
         mOk = true;
     }
 
-    private Uri generateContentUri(Context context, Uri uri) {
+    private Uri generateContentUri(Uri uri) {
         final String path = uri.getPath();
         if (TextUtils.isEmpty(path)) {
             Log.e(TAG, "Empty uri path: " + uri);
@@ -115,7 +114,7 @@ public class Entity {
             return null;
         }
 
-        return getUriForFile(context, "org.mokee.warpshare.files", file);
+        return getUriForFile(app, "org.mokee.warpshare.files", file);
     }
 
     public boolean ok() {
@@ -139,12 +138,12 @@ public class Entity {
     }
 
     public InputStream stream() throws FileNotFoundException {
-        return mContext.getContentResolver().openInputStream(uri);
+        return app.getContentResolver().openInputStream(uri);
     }
 
     public Bitmap thumbnail(int size) {
         try {
-            return Glide.with(mContext)
+            return Glide.with(app)
                     .asBitmap()
                     .load(uri)
                     .centerCrop()

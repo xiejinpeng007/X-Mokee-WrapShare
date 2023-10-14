@@ -24,7 +24,7 @@
     android:orientation="vertical"
     app:behavior_hideable="true"
     app:behavior_peekHeight="280dp"
-    tools:context=".ShareActivity">
+    tools:context=".ui.share.ShareActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -54,14 +54,14 @@
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/peers"
+        android:id="@+id/recycler_view_peers"
         android:layout_width="match_parent"
         android:layout_height="280dp"
         android:orientation="vertical"
         app:layoutManager="LinearLayoutManager" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/send"
+        android:id="@+id/btn_send"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"

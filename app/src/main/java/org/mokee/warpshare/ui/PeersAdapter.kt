@@ -1,14 +1,14 @@
-package org.mokee.warpshare
+package org.mokee.warpshare.ui
 
 import android.os.Build
 import android.text.format.Formatter
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
+import org.mokee.warpshare.R
 import org.mokee.warpshare.airdrop.AirDropPeer
 import org.mokee.warpshare.base.Peer
 import org.mokee.warpshare.nearbysharing.NearSharePeer
@@ -16,11 +16,11 @@ import org.mokee.warpshare.nearbysharing.NearSharePeer
 class PeersAdapter(
     private val onItemClick:(Peer)->Unit,
     private val onItemCancelClick:((Peer)->Unit)? = null,
-) : ListAdapter<Peer,ItemPeerViewHolder>(PeerItemCallback()) {
+) : ListAdapter<Peer, ItemPeerViewHolder>(PeerItemDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemPeerViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        return ItemPeerViewHolder(inflater.inflate(R.layout.item_peer_main, parent, false))
+        return ItemPeerViewHolder(inflater.inflate(R.layout.item_peer, parent, false))
     }
 
     override fun onBindViewHolder(holder: ItemPeerViewHolder, position: Int) {
@@ -45,24 +45,24 @@ class PeersAdapter(
             holder.mBinding.status.visibility = View.GONE
         }
         if (state.status != 0 && state.status != R.string.status_rejected) {
-            holder.itemView.setEnabled(false)
+            holder.itemView.isEnabled = false
             holder.mBinding.progress.visibility = View.VISIBLE
-            holder.mBinding.cancel.setVisibility(View.VISIBLE)
+            holder.mBinding.cancel.visibility = View.VISIBLE
             if (state.bytesTotal == -1L || state.status != R.string.status_sending) {
                 holder.mBinding.progress.isIndeterminate = true
             } else {
                 holder.mBinding.progress.isIndeterminate = false
-                holder.mBinding.progress.setMax(state.bytesTotal.toInt())
+                holder.mBinding.progress.max = state.bytesTotal.toInt()
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    // TODO
                     holder.mBinding.progress.setProgress(state.bytesSent.toInt(), true)
                 }
             }
         } else {
-            holder.itemView.setEnabled(true)
+            holder.itemView.isEnabled = true
             holder.mBinding.progress.visibility = View.GONE
-            holder.mBinding.cancel.setVisibility(View.GONE)
+            holder.mBinding.cancel.visibility = View.GONE
         }
+        Log.d("lq", "onBindViewHolder: $peer")
         if (peer is AirDropPeer) {
             val isMokee = peer.mokeeApiVersion > 0
             if (isMokee) {

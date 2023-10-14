@@ -19,6 +19,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_margin="8dp"
     android:background="@drawable/item_background_rounded"
     android:foreground="@drawable/item_foreground_rounded"
     android:gravity="center_vertical"
@@ -29,7 +30,6 @@
         android:id="@+id/icon"
         android:layout_width="56dp"
         android:layout_height="56dp"
-        android:layout_margin="8dp"
         android:contentDescription="device type"
         android:scaleType="center"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -38,17 +38,17 @@
         app:tint="?android:textColorSecondary"
         tools:src="@drawable/ic_apple_24dp" />
 
-
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/progress"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:indeterminate="true"
+        app:indicatorSize="48dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@id/icon"
         app:layout_constraintStart_toStartOf="@id/icon"
         app:layout_constraintTop_toTopOf="parent"
-        tools:indeterminate="true"
+        tools:indeterminate="false"
         tools:max="100"
         tools:progress="75" />
 

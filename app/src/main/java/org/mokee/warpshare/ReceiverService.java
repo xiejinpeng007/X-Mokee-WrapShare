@@ -38,7 +38,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import org.mokee.warpshare.airdrop.AirDropManager;
-import org.mokee.warpshare.airdrop.AirDropManager.ReceivingSession;
+import org.mokee.warpshare.airdrop.ReceiverListener;
+import org.mokee.warpshare.airdrop.ReceivingSession;
+import org.mokee.warpshare.ui.settings.SettingsActivity;
 
 import java.io.File;
 import java.io.IOException;
@@ -65,7 +67,7 @@ import static android.bluetooth.le.ScanSettings.CALLBACK_TYPE_MATCH_LOST;
 import static androidx.core.content.FileProvider.getUriForFile;
 import static org.mokee.warpshare.airdrop.AirDropManager.STATUS_OK;
 
-public class ReceiverService extends Service implements AirDropManager.ReceiverListener {
+public class ReceiverService extends Service implements ReceiverListener {
 
     private static final String TAG = "ReceiverService";
 
@@ -118,7 +120,7 @@ public class ReceiverService extends Service implements AirDropManager.ReceiverL
         }
     }
 
-    static void updateDiscoverability(Context context) {
+    public static void updateDiscoverability(Context context) {
         final ConfigManager configManager = new ConfigManager(context);
         final PackageManager packageManager = context.getPackageManager();
 

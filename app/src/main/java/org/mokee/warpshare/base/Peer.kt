@@ -16,12 +16,45 @@
 package org.mokee.warpshare.base
 
 import org.mokee.warpshare.MainPeerState
+import org.mokee.warpshare.airdrop.AirDropPeer
+import org.mokee.warpshare.nearbysharing.NearSharePeer
 
-open class Peer(@JvmField val id: String,
-                @JvmField val name: String,
-                @JvmField val status: MainPeerState = MainPeerState(),
-    ){
-    override fun toString(): String {
-        return "Peer(id='$id', name='$name')"
+open class Peer(
+    open val id: String,
+    open val name: String,
+    open val status: MainPeerState = MainPeerState(),
+) {
+
+    fun basicCopy(
+        id: String = this.id,
+        name: String = this.name,
+        status: MainPeerState = this.status.copy(),
+    ): Peer {
+        return Peer(id, name, status)
     }
+
+    override fun toString(): String {
+        return "Peer(id='$id', name='$name', status=$status)"
+    }
+
+}
+
+fun Peer.copyPeer(): Peer {
+    return when (this) {
+        is AirDropPeer -> {
+            this.copy()
+        }
+
+        is NearSharePeer -> {
+            this.copy()
+        }
+
+        else -> {
+            this.basicCopy()
+        }
+    }
+}
+
+fun Peer.withCopy(action:(Peer) -> Unit) {
+    action(this.copyPeer())
 }

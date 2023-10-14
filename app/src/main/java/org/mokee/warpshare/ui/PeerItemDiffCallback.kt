@@ -1,9 +1,9 @@
-package org.mokee.warpshare
+package org.mokee.warpshare.ui
 
 import androidx.recyclerview.widget.DiffUtil
 import org.mokee.warpshare.base.Peer
 
-class PeerItemCallback : DiffUtil.ItemCallback<Peer>() {
+class PeerItemDiffCallback : DiffUtil.ItemCallback<Peer>() {
     override fun areItemsTheSame(p0: Peer, p1: Peer): Boolean {
         return p0 == p1
     }

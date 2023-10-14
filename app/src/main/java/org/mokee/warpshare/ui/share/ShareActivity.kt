@@ -13,27 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.mokee.warpshare.ui.share
 
-package org.mokee.warpshare.airdrop;
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 
-import android.graphics.Bitmap;
-
-import com.gemalto.jp2.JP2Decoder;
-import com.gemalto.jp2.JP2Encoder;
-
-import org.mokee.warpshare.base.Entity;
-
-class AirDropThumbnailUtil {
-
-    private static final int SIZE = 540;
-
-    static byte[] generate(Entity entity) {
-        final Bitmap thumbnail = entity.thumbnail(SIZE);
-        return new JP2Encoder(thumbnail).encode();
+class ShareActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        ShareBottomSheetFragment.show(supportFragmentManager, intent)
     }
 
-    static Bitmap decode(byte[] data) {
-        return new JP2Decoder(data).decode();
+    companion object {
+        private const val TAG = "ShareActivity"
     }
-
 }
