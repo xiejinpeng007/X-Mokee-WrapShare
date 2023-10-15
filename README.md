@@ -2,13 +2,6 @@
 
 内置在魔趣(Mokee)Rom 中的`跃传`没有单独发布 apk ，移植了一下做了一些调整。
 
-* Android to Mac : AirDrop 
-* Android to PC : 微软官方 NearShare 实现 [https://support.microsoft.com/en-us/windows/share-things-with-nearby-devices-in-windows-10-0efbfe40-e3e2-581b-13f4-1a0e9936c2d9](https://support.microsoft.com/en-us/windows/share-things-with-nearby-devices-in-windows-10-0efbfe40-e3e2-581b-13f4-1a0e9936c2d9)
-* 搜设备通过 WIFI + BLE
-
-跃传源代码:[android_packages_apps_WarpShare]
-
-
 ----------
 2023-10-13
 ----------
@@ -21,6 +14,7 @@
 - [x] 支持 Configuration Cache
 - [x] 调试 AirDrop 到 Mac 通过
 - [x] 页面重建不影响功能使用
+- [x] 适配暗色模式
 
 ### Knowning Issue
 
@@ -31,7 +25,6 @@
 ### TODO
 
 - [ ] 支持其他设备分享到本机
-- [ ] 适配暗色模式
 - [ ] 适配 Edge-to-Edge
 - [ ] 适配 Material You
 - [ ] 测试低版本 Android 系统兼容性
