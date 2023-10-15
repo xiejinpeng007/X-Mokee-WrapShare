@@ -18,11 +18,13 @@ package org.mokee.warpshare.presentation.share
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.FragmentManager
@@ -39,9 +41,11 @@ import org.mokee.warpshare.presentation.receiver.WifiStateMonitor
 import org.mokee.warpshare.core.airdrop.AirDropManager
 import org.mokee.warpshare.domain.data.Peer
 import org.mokee.warpshare.databinding.FragmentShareBinding
+import org.mokee.warpshare.presentation.isNightMode
 import org.mokee.warpshare.presentation.view.PeersAdapter
 import org.mokee.warpshare.presentation.main.MainViewModel
 import org.mokee.warpshare.presentation.setup.SetupFragment
+import org.mokee.warpshare.presentation.vdp
 
 class ShareBottomSheetFragment : BottomSheetDialogFragment() {
     private var _mBinding: FragmentShareBinding? = null
@@ -74,7 +78,7 @@ class ShareBottomSheetFragment : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.d(TAG, "onViewCreated")
+        Log.d(TAG, "onViewCreated night ${context?.isNightMode}")
 
         if (mShareViewModel.sendList.isEmpty()) {
             Log.w(TAG, "No file was selected")

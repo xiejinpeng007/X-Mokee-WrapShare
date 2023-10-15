@@ -51,6 +51,7 @@
 <!--        <item name="behavior_peekHeight">320dp</item>-->
         <!--        指定 Expanded 状态下不清除圆角-->
         <item name="shouldRemoveExpandedCorners">false</item>
+        <item name="android:elevation">@dimen/bottom_sheet_elevation</item>
     </style>
 
     <style name="BottomSheetDialogShapeAppearance">

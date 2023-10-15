@@ -29,6 +29,7 @@ class PeersAdapter(
 
         updatePeerIcon(holder.mBinding, peer)
 
+        holder.itemView.isSelected = peer.id == selectedPeer?.id
         holder.itemView.setOnClickListener { onItemClick(peer) }
 
         if (onItemCancelClick == null) {

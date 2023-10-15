@@ -53,12 +53,12 @@ class MainActivity : AppCompatActivity() {
 
     private val mWifiStateMonitor = object : WifiStateMonitor() {
         override fun onReceive(context: Context, intent: Intent) {
-            setupIfNeeded()
+            setupOrStartDiscover()
         }
     }
     private val mBluetoothStateMonitor = object : BluetoothStateMonitor() {
         override fun onReceive(context: Context, intent: Intent) {
-            setupIfNeeded()
+            setupOrStartDiscover()
         }
     }
 
@@ -88,13 +88,7 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         mWifiStateMonitor.register(this)
         mBluetoothStateMonitor.register(this)
-        if (setupIfNeeded()) {
-            return
-        }
-        if (!mViewModel.mIsDiscovering) {
-            mViewModel.appModule.startDiscover(mViewModel)
-            mViewModel.mIsDiscovering = true
-        }
+        setupOrStartDiscover()
     }
 
     override fun onPause() {
@@ -128,19 +122,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupIfNeeded(): Boolean {
+    private fun setupOrStartDiscover() {
         supportFragmentManager.setFragmentResult(SetupFragment.tagForStateChange, Bundle())
-        if (mViewModel.mIsInSetup) {
-            return true
-        }
+        if (mViewModel.mIsInSetup) return
+
         val ready = PermissionUtil.checkAirDropIsReady() == AirDropManager.STATUS_OK
         Log.d(TAG, "setupIfNeeded: $ready")
-        return if (!ready) {
+        if (!ready) {
             mViewModel.mIsInSetup = true
             SetupFragment.show(supportFragmentManager)
-            true
         } else {
-            false
+            if (!mViewModel.mIsDiscovering) {
+                mViewModel.appModule.startDiscover(mViewModel)
+                mViewModel.mIsDiscovering = true
+            }
         }
     }
 
