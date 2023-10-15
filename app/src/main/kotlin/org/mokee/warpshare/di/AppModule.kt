@@ -1,49 +1,34 @@
 package org.mokee.warpshare.di
 
-import org.mokee.warpshare.WarpShareApplication
-import org.mokee.warpshare.airdrop.AirDropManager
-import org.mokee.warpshare.airdrop.AirDropPeer
-import org.mokee.warpshare.base.DiscoverListener
-import org.mokee.warpshare.domain.data.Entity
-import org.mokee.warpshare.domain.data.Peer
-import org.mokee.warpshare.base.SendListener
-import org.mokee.warpshare.base.SendingSession
-import org.mokee.warpshare.nearbysharing.NearShareManager
-import org.mokee.warpshare.nearbysharing.NearSharePeer
+import android.bluetooth.BluetoothManager
+import android.content.Context
+import android.content.SharedPreferences
+import android.net.wifi.WifiManager
+import android.os.PowerManager
+import androidx.preference.PreferenceManager
+import org.mokee.warpshare.presentation.WarpShareApplication
+import org.mokee.warpshare.core.certificate.CertificateManager
+
 
 object AppModule {
-    val mAirDropManager by lazy {
-        AirDropManager(AppModule2.bleManager, AppModule2.wifiManager, AppModule2.certificateManager)
-    }
-    val mNearShareManager by lazy {
-        NearShareManager(WarpShareApplication.instance)
-    }
 
-    fun startDiscover(discoverListener: DiscoverListener) {
-        mAirDropManager.startDiscover(discoverListener)
-        mNearShareManager.startDiscover(discoverListener)
+    val certificateManager = CertificateManager()
+
+    val mPref: SharedPreferences by lazy{
+        PreferenceManager.getDefaultSharedPreferences(WarpShareApplication.instance)
     }
 
-    fun send(peer: Peer, entities: List<Entity>, listener: SendListener): SendingSession? {
-        return when (peer) {
-            is AirDropPeer -> {
-                mAirDropManager.send(peer, entities, listener)
-            }
-
-            is NearSharePeer -> {
-                mNearShareManager.send(peer, entities, listener)
-            }
-            else -> null
-        }
+    val bleManager: BluetoothManager by lazy{
+        WarpShareApplication.instance.applicationContext
+            .getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
     }
 
-    fun stopDiscover() {
-        mAirDropManager.stopDiscover()
-        mNearShareManager.stopDiscover()
+    val powerManager: PowerManager by lazy{
+        WarpShareApplication.instance.applicationContext
+            .getSystemService(Context.POWER_SERVICE) as PowerManager
     }
-
-    fun destroy() {
-        mAirDropManager.destroy()
-        mNearShareManager.destroy()
+    val wifiManager: WifiManager by lazy{
+        WarpShareApplication.instance.applicationContext
+            .getSystemService(Context.WIFI_SERVICE) as WifiManager
     }
 }

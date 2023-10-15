@@ -15,9 +15,6 @@
  */
 package org.mokee.warpshare.domain.data
 
-import org.mokee.warpshare.airdrop.AirDropPeer
-import org.mokee.warpshare.nearbysharing.NearSharePeer
-
 open class Peer(
     open val id: String,
     open val name: String,

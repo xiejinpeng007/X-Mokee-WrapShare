@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="ModalBottomSheetDialog" parent="@style/Theme.MaterialComponents.BottomSheetDialog">
+        <item name="colorControlActivated">@color/colorPrimary</item>
+        <item name="android:colorEdgeEffect">?colorControlHighlight</item>
+
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorOnPrimary">@color/colorOnPrimary</item>
+        <item name="android:colorBackground">@color/colorBackground</item>
+        <item name="colorOnBackground">@color/colorOnBackground</item>
+        <item name="colorSurface">@color/colorSurface</item>
+        <item name="colorOnSurface">@color/colorOnSurface</item>
+
+        <item name="bottomSheetStyle">@style/CustomBottomSheet</item>
+        <!--    启用此属性后，自动调用 WindowCompat#setDecorFitsSystemWindows 方法，其他特性也依赖此属性-->
+        <item name="enableEdgeToEdge">true</item>
+        <item name="android:windowIsFloating">false</item>
+        <!--        指定底部留出一定空间-->
+        <item name="paddingBottomSystemWindowInsets">true</item>
+        <!--        定制系统边栏颜色及遮罩层-->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:enforceNavigationBarContrast" tools:targetApi="q">false</item>
+        <item name="android:enforceStatusBarContrast" tools:targetApi="q">false</item>
+        <item name="android:navigationBarDividerColor" tools:targetApi="o_mr1">
+            @android:color/transparent
+        </item>
+        <!--        定制 BottomSheetDragHandleView 的样式, Material 2 的 Workaround-->
+        <item name="bottomSheetDragHandleStyle">
+            @style/Widget.MaterialComponents.BottomSheet.DragHandle
+        </item>
+    </style>
+
+    <!--    指定 BottomSheetDragHandleView 的属性-->
+    <style name="Widget.MaterialComponents.BottomSheet.DragHandle" parent="Widget.Material3.BottomSheet.DragHandle">
+        <!--        指定背景色-->
+        <item name="tint">?attr/colorOnBackground</item>
+        <item name="android:alpha">0.3</item>
+        <item name="android:paddingBottom">0dp</item>
+    </style>
+
+    <style name="CustomBottomSheet" parent="Widget.MaterialComponents.BottomSheet.Modal">
+        <!--        指定 BottomSheet 的圆角-->
+        <item name="shapeAppearance">@style/BottomSheetDialogShapeAppearance</item>
+        <!--        指定 BottomSheet 的背景色-->
+        <item name="backgroundTint">?attr/colorSurface</item>
+        <!--        指定最宽宽度，规避横屏情况下，BottomSheet 宽度显示异常的问题-->
+        <item name="android:maxWidth">480dp</item>
+        <!--        指定折叠状态高度，规避横屏情况下，折叠状态高度过低的问题-->
+<!--        <item name="behavior_peekHeight">320dp</item>-->
+        <!--        指定 Expanded 状态下不清除圆角-->
+        <item name="shouldRemoveExpandedCorners">false</item>
+    </style>
+
+    <style name="BottomSheetDialogShapeAppearance">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopRight">16dp</item>
+        <item name="cornerSizeTopLeft">16dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+    </style>
+</resources>

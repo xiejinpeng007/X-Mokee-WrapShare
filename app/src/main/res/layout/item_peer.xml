@@ -35,7 +35,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="?android:textColorSecondary"
+        app:tint="?attr/colorOnBackground"
         tools:src="@drawable/ic_apple_24dp" />
 
     <com.google.android.material.progressindicator.CircularProgressIndicator
@@ -60,7 +60,7 @@
         android:layout_marginStart="8dp"
         android:ellipsize="end"
         android:lines="1"
-        android:textColor="@android:color/black"
+        android:textColor="@color/colorOnBackground"
         android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@id/text_status"
         app:layout_constraintEnd_toStartOf="@id/btn_cancel"
@@ -95,6 +95,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/colorOnBackground"
         tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

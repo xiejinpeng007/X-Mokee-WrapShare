@@ -1,7 +1,7 @@
 package org.mokee.warpshare.domain.data
 
 import androidx.annotation.StringRes
-import org.mokee.warpshare.base.SendingSession
+import org.mokee.warpshare.core.listener.SendingSession
 
 /**
  * Peer's current state info

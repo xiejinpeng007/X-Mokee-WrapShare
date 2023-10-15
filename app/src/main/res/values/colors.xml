@@ -17,6 +17,12 @@
 
 <resources>
 
-    <color name="primary">#00897B</color>
+    <color name="colorPrimary">#00897B</color>
+    <color name="colorOnPrimary">@android:color/black</color>
+    <color name="colorBackground">@android:color/white</color>
+    <color name="colorOnBackground">@android:color/black</color>
+    <color name="colorSurface">@android:color/white</color>
+    <color name="colorOnSurface">@android:color/black</color>
+    <color name="colorControlHighlight">#1F000000</color>
 
 </resources>

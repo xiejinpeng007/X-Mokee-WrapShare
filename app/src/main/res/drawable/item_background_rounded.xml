@@ -19,7 +19,7 @@
 
     <item android:state_selected="true">
         <shape android:shape="rectangle">
-            <solid android:color="?colorControlHighlight" />
+            <solid android:color="@color/colorControlHighlight" />
             <corners android:radius="8dp" />
         </shape>
     </item>

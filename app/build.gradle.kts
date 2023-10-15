@@ -62,17 +62,9 @@ android {
         }
 
     }
-//    applicationVariants.configureEach { variant ->
-//        variant.outputs.configureEach { output ->
-//            val date = Date().format("YYYYMMddHHmm")
-//            val apkName = "WarpShare_${versionName}_${date}.apk"
-//            outputFileName = apkName
-//        }
-//    }
 }
 
 dependencies {
-    // define any required OkHttp artifacts without version
     implementation("androidx.preference:preference-ktx:1.2.1")
 
     //Glide

@@ -36,7 +36,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
 
     <application
-        android:name=".WarpShareApplication"
+        android:name=".presentation.WarpShareApplication"
         android:allowBackup="true"
         android:enableOnBackInvokedCallback="true"
         android:icon="@mipmap/ic_launcher"
@@ -47,7 +47,7 @@
         tools:targetApi="tiramisu">
 
         <activity
-            android:name=".ui.main.MainActivity"
+            android:name=".presentation.main.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -56,7 +56,7 @@
         </activity>
 
         <activity
-            android:name=".ui.share.ShareActivity"
+            android:name=".presentation.share.ShareActivity"
             android:exported="true"
             android:theme="@style/ShareTheme">
             <intent-filter>
@@ -79,21 +79,21 @@
         </activity>
 
         <activity
-            android:name=".ui.settings.SettingsActivity"
+            android:name=".presentation.settings.SettingsActivity"
             android:label="@string/settings" />
 
         <service
-            android:name=".ui.service.ReceiverService"
+            android:name=".presentation.service.ReceiverService"
             android:enabled="false"
             android:foregroundServiceType="connectedDevice" />
 
         <receiver
-            android:name=".ui.receiver.TriggerReceiver"
+            android:name=".presentation.receiver.TriggerReceiver"
             android:exported="true"
             tools:ignore="ExportedReceiver" />
 
         <receiver
-            android:name=".ui.receiver.InitializeReceiver"
+            android:name=".presentation.receiver.InitializeReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
