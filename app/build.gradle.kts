@@ -22,7 +22,7 @@ android {
     }
     signingConfigs {
         create("release") {
-            storeFile = file("../keystore/xmokee-warpshare")
+            storeFile = File(rootProject.projectDir,"keystore/xmokee-warpshare")
             storePassword = "xmokeewrapshare"
             keyAlias = "xmokeewrapshare"
             keyPassword = "xmokeewrapshare"
@@ -37,7 +37,23 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.get("release")
+            signingConfig = signingConfigs["release"]
+        }
+    }
+    splits {
+        // Configures multiple APKs based on ABI.
+        abi {
+
+            // Enables building multiple APKs per ABI.
+            isEnable = true
+
+            // By default all ABIs are included, so use reset() and include to specify that you only
+            // want APKs for x86 and x86_64.
+
+            // Resets the list of ABIs for Gradle to create APKs for to none.
+//            reset()
+            // Specifies that you don't want to also generate a universal APK that includes all ABIs.
+            isUniversalApk = true
         }
     }
     buildFeatures {
@@ -55,10 +71,13 @@ android {
 
     applicationVariants.configureEach {
         val date = DateTimeFormatter.ofPattern("yyyyMMdd").format(LocalDateTime.now())
-        val apkName = "WarpShare_${versionName}_${date}.apk"
+        val apkName = "WarpShare_${versionName}%s_${date}.apk"
         outputs.all {
             val output = this as? BaseVariantOutputImpl
-            output?.outputFileName = apkName
+            val abi2 = (this as? BaseVariantOutputImpl)?.getFilter("ABI")?.let{
+                "_$it"
+            }?:""
+            output?.outputFileName = String.format(apkName,abi2)
         }
 
     }
