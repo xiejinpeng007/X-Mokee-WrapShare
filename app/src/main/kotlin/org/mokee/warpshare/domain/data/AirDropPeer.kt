@@ -38,8 +38,17 @@ data class AirDropPeer(
             return api.asInt
         }
 
+    override fun isTheSamePeer(other: Peer): Boolean {
+        return if (other is AirDropPeer) {
+            url == other.url
+        } else {
+            super.isTheSamePeer(other)
+        }
+    }
+
     companion object {
         private const val TAG = "AirDropPeer"
+
         @JvmStatic
         fun from(dict: NSDictionary, id: String, url: String): AirDropPeer? {
             val nameNode = dict["ReceiverComputerName"]

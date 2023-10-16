@@ -18,16 +18,14 @@ package org.mokee.warpshare.presentation.share
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
-import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.Toast
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
@@ -45,26 +43,25 @@ import org.mokee.warpshare.presentation.isNightMode
 import org.mokee.warpshare.presentation.view.PeersAdapter
 import org.mokee.warpshare.presentation.main.MainViewModel
 import org.mokee.warpshare.presentation.setup.SetupFragment
-import org.mokee.warpshare.presentation.vdp
 
 class ShareBottomSheetFragment : BottomSheetDialogFragment() {
     private var _mBinding: FragmentShareBinding? = null
     private val mBinding: FragmentShareBinding
         get() = _mBinding!!
 
-    private val mViewModel by viewModels<MainViewModel>()
+    private val mViewModel by activityViewModels<MainViewModel>()
     private val mShareViewModel by viewModels<ShareViewModel>()
 
     private val mPeersAdapter = PeersAdapter(this::handleItemClick)
 
     private val mWifiStateMonitor: WifiStateMonitor = object : WifiStateMonitor() {
         override fun onReceive(context: Context, intent: Intent) {
-            setupIfNeeded()
+            setupOrStartDiscovering()
         }
     }
     private val mBluetoothStateMonitor: BluetoothStateMonitor = object : BluetoothStateMonitor() {
         override fun onReceive(context: Context, intent: Intent) {
-            setupIfNeeded()
+            setupOrStartDiscovering()
         }
     }
 
@@ -137,13 +134,7 @@ class ShareBottomSheetFragment : BottomSheetDialogFragment() {
             mWifiStateMonitor.register(it)
             mBluetoothStateMonitor.register(it)
         }
-        if (setupIfNeeded()) {
-            return
-        }
-        if (!mViewModel.mIsDiscovering) {
-            mViewModel.mIsDiscovering = true
-            mViewModel.appModule.startDiscover(mViewModel)
-        }
+        setupOrStartDiscovering()
     }
 
     override fun onPause() {
@@ -168,16 +159,21 @@ class ShareBottomSheetFragment : BottomSheetDialogFragment() {
         }
     }
 
-    private fun setupIfNeeded(): Boolean {
-        if (mViewModel.mIsInSetup) {
-            return true
-        }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _mBinding = null
+    }
+
+    private fun setupOrStartDiscovering() {
+        if (mViewModel.mIsInSetup) return
         val ready = mViewModel.appModule.mAirDropManager.ready() == AirDropManager.STATUS_OK
-        return if (!ready) {
+        if (!ready) {
             SetupFragment.show(parentFragmentManager)
-            true
         } else {
-            false
+            if (!mViewModel.mIsDiscovering) {
+                mViewModel.mIsDiscovering = true
+                mViewModel.appModule.startDiscover(mViewModel)
+            }
         }
     }
 

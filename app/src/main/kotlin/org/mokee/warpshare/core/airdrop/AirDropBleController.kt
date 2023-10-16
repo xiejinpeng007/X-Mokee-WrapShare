@@ -102,6 +102,19 @@ internal class AirDropBleController(private val bleManager: BluetoothManager) {
         }
     }
 
+    private val filters = arrayListOf(
+        ScanFilter.Builder()
+            .setManufacturerData(MANUFACTURER_ID, MANUFACTURER_DATA, MANUFACTURER_DATA)
+            .build()
+    )
+
+    private val scanSettings = ScanSettings.Builder()
+        .setCallbackType(ScanSettings.CALLBACK_TYPE_FIRST_MATCH or ScanSettings.CALLBACK_TYPE_MATCH_LOST)
+        .setMatchMode(ScanSettings.MATCH_MODE_STICKY)
+        .setNumOfMatches(ScanSettings.MATCH_NUM_MAX_ADVERTISEMENT)
+        .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+        .build()
+
     @Synchronized
     fun registerTrigger(pendingIntent: PendingIntent) {
         if (mScanner == null) {
@@ -110,35 +123,22 @@ internal class AirDropBleController(private val bleManager: BluetoothManager) {
         if (!checkPermission(PermissionUtil.blePermissions)) {
             return
         }
-        val filters: MutableList<ScanFilter> = ArrayList()
-        filters.add(
-            ScanFilter.Builder()
-                .setManufacturerData(MANUFACTURER_ID, MANUFACTURER_DATA, MANUFACTURER_DATA)
-                .build()
-        )
+        if(adapter?.isEnabled != true){
+            return
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            mScanner?.startScan(
-                filters,
-                ScanSettings.Builder()
-                    .setCallbackType(ScanSettings.CALLBACK_TYPE_FIRST_MATCH or ScanSettings.CALLBACK_TYPE_MATCH_LOST)
-                    .setMatchMode(ScanSettings.MATCH_MODE_STICKY)
-                    .setNumOfMatches(ScanSettings.MATCH_NUM_MAX_ADVERTISEMENT)
-                    .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-                    .build(),
-                pendingIntent
-            )
+//            mScanner?.startScan(filters, scanSettings, object : ScanCallback() {
+//                override fun onScanResult(callbackType: Int, result: ScanResult) {
+//                    super.onScanResult(callbackType, result)
+//                }
+//            })
+            mScanner?.startScan(filters, scanSettings, pendingIntent)
         } else {
-            mScanner?.startScan(filters,
-                ScanSettings.Builder()
-                    .setCallbackType(ScanSettings.CALLBACK_TYPE_FIRST_MATCH or ScanSettings.CALLBACK_TYPE_MATCH_LOST)
-                    .setMatchMode(ScanSettings.MATCH_MODE_STICKY)
-                    .setNumOfMatches(ScanSettings.MATCH_NUM_MAX_ADVERTISEMENT)
-                    .build(),
-                object : ScanCallback() {
-                    override fun onScanResult(callbackType: Int, result: ScanResult) {
-                        super.onScanResult(callbackType, result)
-                    }
-                })
+            mScanner?.startScan(filters, scanSettings, object : ScanCallback() {
+                override fun onScanResult(callbackType: Int, result: ScanResult) {
+                    super.onScanResult(callbackType, result)
+                }
+            })
         }
         Log.d(TAG, "startScan")
     }

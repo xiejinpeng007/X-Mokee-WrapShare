@@ -64,13 +64,12 @@ internal class AirDropNsdController(
 
     fun destroy() {
         mNetworkingHandler.post {
-            if (mJmdns != null) {
-                try {
-                    mJmdns!!.close()
-                } catch (ignored: IOException) {
-                }
-                mJmdns = null
+            try {
+                mJmdns?.close()
+            } catch (ignored: IOException) {
             }
+            mJmdns = null
+
             mNetworkingHandler.removeCallbacksAndMessages(null)
             mNetworkingThread.quit()
         }
@@ -91,15 +90,13 @@ internal class AirDropNsdController(
         mNetworkingHandler.post {
             mMulticastLock.acquire()
             createJmdns(address)
-            mJmdns!!.addServiceListener(SERVICE_TYPE, mDiscoveryListener)
+            mJmdns?.addServiceListener(SERVICE_TYPE, mDiscoveryListener)
         }
     }
 
     fun stopDiscover() {
         mNetworkingHandler.post {
-            if (mJmdns != null) {
-                mJmdns!!.removeServiceListener(SERVICE_TYPE, mDiscoveryListener)
-            }
+            mJmdns?.removeServiceListener(SERVICE_TYPE, mDiscoveryListener)
             mMulticastLock.release()
         }
     }
@@ -108,24 +105,22 @@ internal class AirDropNsdController(
         mNetworkingHandler.post {
             createJmdns(address)
             val props: MutableMap<String, String?> = HashMap()
-            props["flags"] = Integer.toString(
-                FLAG_SUPPORTS_MIXED_TYPES or FLAG_SUPPORTS_DISCOVER_MAYBE
-            )
+            props["flags"] = (FLAG_SUPPORTS_MIXED_TYPES or FLAG_SUPPORTS_DISCOVER_MAYBE).toString()
             val serviceInfo = ServiceInfo.create(
                 SERVICE_TYPE,
                 mConfigManager.id, port, 0, 0, props
             )
             Log.d(TAG, "Publishing $serviceInfo")
             try {
-                mJmdns!!.registerService(serviceInfo)
+                mJmdns?.registerService(serviceInfo)
             } catch (e: IOException) {
                 e.printStackTrace()
             }
         }
     }
 
-    fun unpublish() {
-        mNetworkingHandler.post { mJmdns!!.unregisterAllServices() }
+    fun unPublish() {
+        mJmdns?.unregisterAllServices()
     }
 
     private fun handleServiceLost(serviceInfo: ServiceInfo) {
@@ -142,7 +137,7 @@ internal class AirDropNsdController(
                     ", flags=" + serviceInfo.getPropertyString("flags")
         )
         val addresses = serviceInfo.inet4Addresses
-        if (addresses.size > 0) {
+        if (addresses.isNotEmpty()) {
             val url = String.format(
                 Locale.US, "https://%s:%d",
                 addresses[0].hostAddress, serviceInfo.port

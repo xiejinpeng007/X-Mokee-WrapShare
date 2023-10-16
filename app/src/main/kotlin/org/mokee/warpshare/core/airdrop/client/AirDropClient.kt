@@ -25,8 +25,10 @@ import java.io.InputStream
 import java.lang.Exception
 import java.net.NetworkInterface
 import java.text.ParseException
+import java.util.concurrent.TimeUnit
 import javax.net.ssl.X509TrustManager
 import javax.xml.parsers.ParserConfigurationException
+import kotlin.time.Duration.Companion.seconds
 
 internal class AirDropClient(certificateManager: CertificateManager) {
     private val mHandler = Handler(Looper.getMainLooper())
@@ -36,6 +38,7 @@ internal class AirDropClient(certificateManager: CertificateManager) {
     init {
         mHttpClient = OkHttpClient.Builder()
             .socketFactory(LinkLocalAddressSocketFactory())
+            .connectTimeout(3, TimeUnit.SECONDS)
             .sslSocketFactory(
                 certificateManager.sSLContext.socketFactory,
                 certificateManager.trustManagers[0] as X509TrustManager
@@ -125,7 +128,7 @@ internal class AirDropClient(certificateManager: CertificateManager) {
     }
 
     private fun postResponse(callback: AirDropClientCallback, response: NSDictionary) {
-        Log.d(TAG, "postResponse: ${response}")
+        Log.d(TAG, "postResponse: $response")
         mHandler.post { callback.onResponse(response) }
     }
 

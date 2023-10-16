@@ -63,6 +63,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d(TAG, "onCreate: ")
         super.onCreate(savedInstanceState)
         mBinding = ActivityMainBinding.inflate(LayoutInflater.from(this))
         setContentView(mBinding.root)
@@ -86,6 +87,7 @@ class MainActivity : AppCompatActivity() {
     }
     override fun onResume() {
         super.onResume()
+        Log.d(TAG, "onResume: ")
         mWifiStateMonitor.register(this)
         mBluetoothStateMonitor.register(this)
         setupOrStartDiscover()
@@ -93,9 +95,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
+        Log.d(TAG, "onPause: ")
         if (mViewModel.mIsDiscovering && !mViewModel.mShouldKeepDiscovering) {
-            mViewModel.appModule.stopDiscover()
             mViewModel.mIsDiscovering = false
+            mViewModel.appModule.stopDiscover()
         }
         mWifiStateMonitor.unregister(this)
         mBluetoothStateMonitor.unregister(this)
@@ -155,9 +158,9 @@ class MainActivity : AppCompatActivity() {
      */
     private fun onGetMultipleContent(uriList:List<Uri>){
         Log.d(TAG, "onGetMultipleContent: ${uriList.joinToString()}")
-        if (uriList.isEmpty()) {
-            return
-        }
+
+        if (uriList.isEmpty()) return
+
         mViewModel.mShouldKeepDiscovering = false
         val peer = mViewModel.ensurePickedPeer() ?: return
         val applicationContext = application ?: return

@@ -127,8 +127,20 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), DiscoverListe
 
     override fun onPeerFound(peer: Peer) {
         Log.d(TAG, "Found: " + peer.id + " (" + peer.name + ")")
-        if (peerList.find { it.id == peer.id } == null) {
+        var index = -1
+        for (i in peerList.indices) {
+            if (peerList[i].isTheSamePeer(peer)) {
+                index = i
+                return
+            }
+        }
+        if (index == -1) {
             peerList = peerList + peer
+            _peerListLiveData.value = peerList
+        }else{
+            peerList = peerList.toMutableList().apply {
+                set(index, peer)
+            }
             _peerListLiveData.value = peerList
         }
     }
@@ -139,7 +151,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), DiscoverListe
         _peerListLiveData.value = peerList
     }
 
-    fun updatePeer(peer: Peer) {
+    private fun updatePeer(peer: Peer) {
         viewModelScope.launch {
             _peerUpdateFlow.emit(peer)
         }

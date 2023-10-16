@@ -134,7 +134,7 @@ class AirDropManager(
     }
 
     fun stopDiscoverable() {
-        mNsdController.unpublish()
+        mNsdController.unPublish()
         mServer.stop()
     }
 
@@ -155,6 +155,7 @@ class AirDropManager(
             }
 
             override fun onResponse(response: NSDictionary) {
+                Log.d(TAG, "onResponse: id:$id, url:$url")
                 val peer = from(response, id, url) ?: return
                 mPeers[id] = peer
                 mDiscoverListener?.onPeerFound(peer)

@@ -29,6 +29,10 @@ open class Peer(
         return Peer(id, name, status)
     }
 
+    open fun isTheSamePeer(other: Peer): Boolean {
+        return this.id == other.id
+    }
+
     override fun toString(): String {
         return "Peer(id='$id', name='$name', status=$status)"
     }

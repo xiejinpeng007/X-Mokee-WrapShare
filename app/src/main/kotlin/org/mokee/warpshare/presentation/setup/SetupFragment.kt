@@ -98,7 +98,11 @@ class SetupFragment : DialogFragment() {
     }
 
     private fun turnOnBluetooth() {
-        permissionUtil.requestBLEPermission()
+        if(PermissionUtil.checkAirDropIsReady() == AirDropManager.STATUS_OK){
+            updateState()
+        }else {
+            permissionUtil.requestBLEPermission()
+        }
     }
 
     companion object {
