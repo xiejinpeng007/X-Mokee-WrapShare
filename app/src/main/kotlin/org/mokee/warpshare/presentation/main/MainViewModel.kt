@@ -18,7 +18,6 @@ import org.mokee.warpshare.core.listener.SendListener
 import org.mokee.warpshare.di.ShareManagerModule
 import org.mokee.warpshare.domain.data.Entity
 import org.mokee.warpshare.domain.data.Peer
-import org.mokee.warpshare.presentation.receiver.TriggerReceiver
 
 class MainViewModel(val app: Application) : AndroidViewModel(app), DiscoverListener {
     val appModule = ShareManagerModule
@@ -27,16 +26,15 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), DiscoverListe
 //    private set
 
     private var peerList = listOf<Peer>()
-
-    var mIsInSetup = false
-    var mIsDiscovering = false
-    var mPeerPicked: Peer? = null
     private val _peerListLiveData = MutableLiveData(listOf<Peer>())
     val peerListLiveData: LiveData<List<Peer>>
         get() = _peerListLiveData
 
-    private val _peerUpdateFlow = MutableSharedFlow<Peer?>()
+    var mIsInSetup = false
+    var mIsDiscovering = false
+    var mPeerPicked: Peer? = null
 
+    private val _peerUpdateFlow = MutableSharedFlow<Peer?>()
     val peerUpdateFlow: SharedFlow<Peer?> = _peerUpdateFlow.shareIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000L),
@@ -159,8 +157,6 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), DiscoverListe
 
     fun onSuccessConfigAirDrop(context: Context) {
         mIsInSetup = false
-        val intent = TriggerReceiver.getTriggerIntent(context)
-        appModule.mAirDropManager.registerTrigger(intent)
     }
 
     companion object {

@@ -58,7 +58,6 @@ class SetupFragment : DialogFragment() {
         super.onViewCreated(view, savedInstanceState)
         isCancelable = false
         mBinding.wifi.setOnClickListener { setupWifi() }
-        mBinding.bt.setOnClickListener { turnOnBluetooth() }
 
         parentFragmentManager.setFragmentResultListener(tagForStateChange, viewLifecycleOwner) { _, _ ->
             updateState()
@@ -75,12 +74,10 @@ class SetupFragment : DialogFragment() {
             AirDropManager.STATUS_NO_WIFI -> {
                 mBinding.groupPerm.visibility = View.GONE
                 mBinding.groupWifi.visibility = View.VISIBLE
-                mBinding.groupBt.visibility = View.GONE
             }
             AirDropManager.STATUS_NO_BLUETOOTH -> {
                 mBinding.groupPerm.visibility = View.GONE
                 mBinding.groupWifi.visibility = View.GONE
-                mBinding.groupBt.visibility = View.VISIBLE
             }
             else -> {
                 try {
@@ -95,14 +92,6 @@ class SetupFragment : DialogFragment() {
 
     private fun setupWifi() {
         startActivity(Intent(Settings.ACTION_WIFI_SETTINGS))
-    }
-
-    private fun turnOnBluetooth() {
-        if(PermissionUtil.checkAirDropIsReady() == AirDropManager.STATUS_OK){
-            updateState()
-        }else {
-            permissionUtil.requestBLEPermission()
-        }
     }
 
     companion object {

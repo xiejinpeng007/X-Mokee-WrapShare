@@ -1,8 +1,6 @@
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
-import java.text.DateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Date
 
 plugins {
     id("com.android.application")
@@ -13,7 +11,8 @@ android {
     compileSdk = 34
     defaultConfig {
         applicationId = "org.mokee.warpshare"
-        minSdk = 23
+        minSdk = 21
+        //noinspection ExpiredTargetSdkVersion
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"

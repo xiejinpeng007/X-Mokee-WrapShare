@@ -1,6 +1,5 @@
 package org.mokee.warpshare.presentation
 
-import android.Manifest
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.content.Intent
@@ -17,7 +16,6 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import org.mokee.warpshare.R
-import org.mokee.warpshare.core.airdrop.AirDropManager
 import org.mokee.warpshare.di.ShareManagerModule
 
 
@@ -58,21 +56,6 @@ class PermissionUtil(private val att: Activity, private val onRes: ((Map<String,
         }
     }
 
-    fun requestBLEPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (checkPermission(blePermissions)) {
-                if (BluetoothAdapter.getDefaultAdapter().enable()) {
-                    requestToTurnOnBle()
-                }
-            } else {
-                mRequestBLELauncher31?.launch(blePermissions)
-            }
-
-        } else {
-            requestToTurnOnBle()
-        }
-    }
-
     private fun goAppSettingPage(){
         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -102,17 +85,6 @@ class PermissionUtil(private val att: Activity, private val onRes: ((Map<String,
     companion object {
         const val TAG = "PermissionUtil"
 
-        @JvmField
-        val blePermissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            arrayOf(
-                Manifest.permission.BLUETOOTH_SCAN,
-                Manifest.permission.BLUETOOTH_CONNECT,
-                Manifest.permission.BLUETOOTH_ADVERTISE,
-            )
-        } else {
-            arrayOf()
-        }
-
         /**
          * Check if all permissions are granted
          * @param permissions
@@ -128,15 +100,7 @@ class PermissionUtil(private val att: Activity, private val onRes: ((Map<String,
         }
 
         fun checkAirDropIsReady(): Int {
-            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                if (!checkPermission(blePermissions)) {
-                    return AirDropManager.STATUS_NO_BLUETOOTH
-                } else {
-                    ShareManagerModule.mAirDropManager.ready()
-                }
-            } else {
-                return ShareManagerModule.mAirDropManager.ready()
-            }
+            return ShareManagerModule.mAirDropManager.ready()
         }
     }
 }

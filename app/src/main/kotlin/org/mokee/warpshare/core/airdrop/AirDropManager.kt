@@ -15,8 +15,6 @@
  */
 package org.mokee.warpshare.core.airdrop
 
-import android.app.PendingIntent
-import android.bluetooth.BluetoothManager
 import android.graphics.Bitmap
 import android.os.Handler
 import android.os.Looper
@@ -29,21 +27,21 @@ import com.google.gson.JsonObject
 import okio.Pipe
 import okio.buffer
 import org.mokee.warpshare.core.airdrop.AirDropArchiveUtil.FileFactory
-import org.mokee.warpshare.domain.data.AirDropPeer.Companion.from
 import org.mokee.warpshare.core.airdrop.client.AirDropClient
 import org.mokee.warpshare.core.airdrop.client.AirDropClientCallback
 import org.mokee.warpshare.core.airdrop.server.AirDropServer
 import org.mokee.warpshare.core.airdrop.server.ResultCallback
+import org.mokee.warpshare.core.certificate.CertificateManager
+import org.mokee.warpshare.core.listener.Cancelable
 import org.mokee.warpshare.core.listener.DiscoverListener
 import org.mokee.warpshare.core.listener.Discoverer
-import org.mokee.warpshare.domain.data.Entity
+import org.mokee.warpshare.core.listener.ReceiverListener
 import org.mokee.warpshare.core.listener.SendListener
 import org.mokee.warpshare.core.listener.Sender
 import org.mokee.warpshare.core.listener.SendingSession
-import org.mokee.warpshare.core.certificate.CertificateManager
-import org.mokee.warpshare.core.listener.Cancelable
-import org.mokee.warpshare.core.listener.ReceiverListener
 import org.mokee.warpshare.domain.data.AirDropPeer
+import org.mokee.warpshare.domain.data.AirDropPeer.Companion.from
+import org.mokee.warpshare.domain.data.Entity
 import java.io.IOException
 import java.io.InputStream
 import java.util.concurrent.ExecutorService
@@ -52,12 +50,10 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
 class AirDropManager(
-    bleManager: BluetoothManager,
     wifiManager: android.net.wifi.WifiManager,
     certificateManager: CertificateManager
 ) : Discoverer, Sender<AirDropPeer> {
     private val mConfigManager = AirDropConfigManager()
-    private val mBleController: AirDropBleController
     private val mNsdController: AirDropNsdController
     private val mWlanController: AirDropWlanController
     private val mClient: AirDropClient
@@ -70,7 +66,6 @@ class AirDropManager(
     private val mMainThreadHandler = Handler(Looper.getMainLooper())
 
     init {
-        mBleController = AirDropBleController(bleManager)
         mNsdController = AirDropNsdController(mConfigManager, this, wifiManager)
         mWlanController = AirDropWlanController()
         mClient = AirDropClient(certificateManager)
@@ -94,9 +89,6 @@ class AirDropManager(
     }
 
     fun ready(): Int {
-        if (!mBleController.ready()) {
-            return STATUS_NO_BLUETOOTH
-        }
         if (!mWlanController.ready()) {
             return STATUS_NO_WIFI
         }
@@ -109,14 +101,12 @@ class AirDropManager(
             return
         }
         mDiscoverListener = discoverListener
-        mBleController.triggerDiscoverable()
         mWlanController.localAddress?.also {
             mNsdController.startDiscover(it)
         }
     }
 
     override fun stopDiscover() {
-        mBleController.stop()
         mNsdController.stopDiscover()
     }
 
@@ -141,10 +131,6 @@ class AirDropManager(
     fun destroy() {
         mNsdController.destroy()
         mArchiveExecutor.shutdownNow()
-    }
-
-    fun registerTrigger(pendingIntent: PendingIntent) {
-        mBleController.registerTrigger(pendingIntent)
     }
 
     fun onServiceResolved(id: String, url: String) {

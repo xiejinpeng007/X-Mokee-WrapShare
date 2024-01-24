@@ -39,7 +39,6 @@ import org.mokee.warpshare.databinding.ActivityMainBinding
 import org.mokee.warpshare.presentation.PermissionUtil
 import org.mokee.warpshare.presentation.view.PeersAdapter
 import org.mokee.warpshare.presentation.receiver.BluetoothStateMonitor
-import org.mokee.warpshare.presentation.receiver.TriggerReceiver
 import org.mokee.warpshare.presentation.receiver.WifiStateMonitor
 import org.mokee.warpshare.presentation.settings.SettingsActivity
 import org.mokee.warpshare.presentation.setup.SetupFragment
@@ -67,12 +66,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         mBinding = ActivityMainBinding.inflate(LayoutInflater.from(this))
         setContentView(mBinding.root)
-
         mPickFileLauncher = registerForActivityResult(ActivityResultContracts.GetMultipleContents()) {
             this.onGetMultipleContent(it)
         }
 
-        mViewModel.appModule.mAirDropManager.registerTrigger(TriggerReceiver.getTriggerIntent(this))
         mBinding.recyclerViewPeers.adapter = mPeersAdapter
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)

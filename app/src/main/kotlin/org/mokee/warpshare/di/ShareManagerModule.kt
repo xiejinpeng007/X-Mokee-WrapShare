@@ -13,7 +13,7 @@ import org.mokee.warpshare.domain.data.NearSharePeer
 
 object ShareManagerModule {
     val mAirDropManager by lazy {
-        AirDropManager(AppModule.bleManager, AppModule.wifiManager, AppModule.certificateManager)
+        AirDropManager(AppModule.wifiManager, AppModule.certificateManager)
     }
     val mNearShareManager by lazy {
         NearShareManager(WarpShareApplication.instance)

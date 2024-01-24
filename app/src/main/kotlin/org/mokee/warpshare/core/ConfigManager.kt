@@ -15,31 +15,40 @@
  */
 package org.mokee.warpshare.core
 
+import android.R.attr.capitalize
+import android.os.Build
+import android.provider.Settings
 import org.mokee.warpshare.di.AppModule
-import org.mokee.warpshare.presentation.PermissionUtil
-import org.mokee.warpshare.presentation.PermissionUtil.Companion.checkPermission
+import org.mokee.warpshare.presentation.WarpShareApplication
+
 
 /**
  * 设置相关管理类
  */
 object ConfigManager {
 
-    private val bluetoothAdapterName: String?
-        get() {
-            val adapter = AppModule.bleManager.adapter ?: return null
-            return if (!checkPermission(PermissionUtil.blePermissions)) {
-                null
-            } else {
-                adapter.name
-            }
+    fun getDeviceName(): String {
+        val manufacturer = Build.MANUFACTURER
+        val model = Build.MODEL
+
+        return if (model.startsWith(manufacturer)) {
+            model.uppercase()
+        } else {
+            "${manufacturer.uppercase()}$model"
         }
+    }
+
 
     /**
      * 默认名称 默认 设备名，没有直接 “Android”
      */
     val defaultName: String
         get() {
-            return bluetoothAdapterName.takeIf { !it.isNullOrBlank() } ?: "Android"
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+                Settings.Global.getString(WarpShareApplication.instance.contentResolver, Settings.Global.DEVICE_NAME) ?: getDeviceName()
+            } else {
+                getDeviceName()
+            }
         }
 
     /**
